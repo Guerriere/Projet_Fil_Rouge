@@ -2,15 +2,14 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\PartnerRegistrationController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 
-Route::get('/', function () {
-    return view('accueil');
-});
+
 
 //Ajouter des routes pour les différents formulaires d'inscription
 Route::get('/register/partner', [PartnerRegistrationController::class, 'showRegistrationForm'])->name('register.partner');
@@ -43,5 +42,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
+// page accessible sans authentification
+Route::get('/', [PageController::class, 'accueil'])->name('accueil');
+Route::get('about', [PageController::class, 'about'])->name('about');
+Route::get('contact', [PageController::class, 'contact'])->name('contact');
+Route::get('services', [PageController::class, 'services'])->name('services');
+Route::get('booking', [PageController::class, 'booking'])->name('booking');
+Route::get('faq', [PageController::class, 'faq'])->name('faq');
+Route::get('error', [PageController::class, 'error'])->name('error');
+Route::get('agence', [PageController::class, 'agence'])->name('agence');
 require __DIR__.'/auth.php';
