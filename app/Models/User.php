@@ -10,7 +10,6 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -54,14 +53,47 @@ class User extends Authenticatable
         'role' => 'string',
     ];
 
-    
+    /**
+     * Check if the user is an admin.
+     *
+     * @return bool
+     */
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
 
-   
+    /**
+     * Check if the user is a partner.
+     *
+     * @return bool
+     */
+    public function isPartner()
+    {
+        return $this->role === 'partenaire';
+    }
+
+    /**
+     * Check if the user is a client.
+     *
+     * @return bool
+     */
+    public function isClient()
+    {
+        return $this->role === 'client';
+    }
+
+    /**
+     * Define the relationship with the Reservation model.
+     */
     public function reservations()
     {
         return $this->hasMany(Reservation::class);
     }
-
+    
+    /**
+     * Define the relationship with the Avis model.
+     */
     public function avis()
     {
         return $this->hasMany(Avis::class);

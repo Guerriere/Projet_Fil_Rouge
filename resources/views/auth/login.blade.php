@@ -79,10 +79,11 @@
             <!-- Submit Button -->
             <div>
                 <button type="submit"
-                    class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition">
+                    class="w-full bg-blue-500 py-2 px-4 rounded-md hover:bg-blue-600 transition">
                     Connexion
                 </button>
             </div>
+            
         </form>
 
         <!-- Register Link -->

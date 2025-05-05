@@ -29,7 +29,7 @@
                         <h1 class="display-2 text-capitalize text-white mb-4">Explorez Le Cameroun Avec Les meilleures Offres</h1>
                         <p class="mb-5 fs-5">Decouvrez les offres des agences de voyages partenaire et reservez votre prochain voyage en toute simplicité .</p>
                         <div class="d-flex align-items-center justify-content-center">
-                            <a class="btn-hover-bg btn btn-primary rounded-pill text-white py-3 px-5" href="#">voir les offres</a>
+                            <a class="btn-hover-bg btn btn-primary rounded-pill text-white py-3 px-5" href="{{ url('/agence') }}">voir les offres</a>
                         </div>
                     </div>
                 </div>
@@ -43,7 +43,7 @@
                         <h1 class="display-2 text-capitalize text-white mb-4">Trouvez Votre Agence de Confiance </h1>
                         <p class="mb-5 fs-5">Profitez d'une expérience unique avec des agences fiables et des destinations variées.</p>
                         <div class="d-flex align-items-center justify-content-center">
-                            <a class="btn-hover-bg btn btn-primary rounded-pill text-white py-3 px-5" href="#">Découvrir</a>
+                            <a class="btn-hover-bg btn btn-primary rounded-pill text-white py-3 px-5" href="{{ url('/agence') }}">Découvrir</a>
                         </div>
                     </div>
                 </div>
@@ -57,7 +57,7 @@
                         <h1 class="display-2 text-capitalize text-white mb-4">Réservez Votre Billet En Quelques clics</h1>
                         <p class="mb-5 fs-5">Avec notre plateformes, réservez facilement vos billets pour toutes vos destinations au Cameroun.</p>
                         <div class="d-flex align-items-center justify-content-center">
-                            <a class="btn-hover-bg btn btn-primary rounded-pill text-white py-3 px-5" href="#">Réserver mainteant</a>
+                            <a class="btn-hover-bg btn btn-primary rounded-pill text-white py-3 px-5" href="{{ url('/agence') }}">Réserver mainteant</a>
                         </div>
                     </div>
                 </div>
@@ -102,7 +102,7 @@
                         <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Support client 24/7</p>
                     </div>
                 </div>
-                <a class="btn btn-primary rounded-pill py-3 px-5 mt-2" href="">En savoir plus</a>
+                <a class="btn btn-primary rounded-pill py-3 px-5 mt-2" href="{{ url('/about') }}">En savoir plus</a>
             </div>
         </div>
     </div>
@@ -189,7 +189,7 @@
             </div>
             <div class="col-12">
                 <div class="text-center">
-                    <a class="btn btn-primary rounded-pill py-3 px-5 mt-2" href="#">En savoir plus</a>
+                    <a class="btn btn-primary rounded-pill py-3 px-5 mt-2" href="{{ url('/services') }}">En savoir plus</a>
                 </div>
             </div>
         </div>
@@ -389,7 +389,7 @@
             </div>
         </div>
         <div class="text-center mt-5">
-            <a href="{{ url('/partner/register') }}" class="btn btn-primary rounded-pill py-3 px-5">
+            <a href="{{ route('register.partner') }}" class="btn btn-primary rounded-pill py-3 px-5">
                 <i class="fas fa-handshake mr-2"></i> Devenir partenaire
             </a>
         </div>
@@ -397,9 +397,10 @@
 </div>
 
 <!-- Bouton flottant -->
-<a href="{{ url('/partner/register') }}" class="btn btn-primary rounded-circle btn-lg position-fixed" style="bottom: 20px; right: 20px; z-index: 1000;">
-    <i class="fas fa-handshake"></i>
+<a href="{{ route('register.partner') }}" class="btn btn-primary rounded-pill btn-lg position-fixed" style="bottom: 20px; right: 20px; z-index: 1000;">
+<i class="fas fa-handshake"> Devenir partenaire</i>
 </a>
+
 
     
     <!-- Statistiques Start -->

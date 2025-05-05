@@ -2,18 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Agence;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class PartnerController extends Controller
 {
+    /**
+     * Affiche le tableau de bord du partenaire.
+     */
     public function dashboard()
     {
-        // Récupérer les données nécessaires pour le tableau de bord partenaire
-        $partner = auth()->user()->partner;
-        
-        // Ici, vous récupérerez les données spécifiques au partenaire
-        // comme ses offres, réservations, etc.
+        // Récupérer l'utilisateur connecté
+        $user = Auth::user();
 
-        return view('partner.dashboard', compact('partner'));
+        // Récupérer les informations de l'agence associée
+        $agence = Agence::where('user_id', $user->id)->first();
+
+        // Vérifiez si l'agence existe
+        if (!$agence) {
+            return redirect()->route('dashboard')->with('error', 'Aucune agence associée trouvée.');
+        }
+
+        // Passer les données à la vue
+        return view('partner.dashboard', compact('agence'));
     }
 }
