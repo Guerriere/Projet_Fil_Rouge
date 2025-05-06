@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Agence;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 
 class PartnerController extends Controller
 {
@@ -21,10 +20,30 @@ class PartnerController extends Controller
 
         // Vérifiez si l'agence existe
         if (!$agence) {
-            return redirect()->route('dashboard')->with('error', 'Aucune agence associée trouvée.');
+            return redirect()->route('home')->with('error', 'Aucune agence associée trouvée.');
         }
 
+        // Exemple de statistiques dynamiques
+        $totalReservations = 120; // Exemple : récupérer depuis la base de données
+        $totalRevenus = 15000; // Exemple : récupérer depuis la base de données
+        $servicesActifs = 8; // Exemple : récupérer depuis la base de données
+        $reservationsEnAttente = 5; // Exemple : récupérer depuis la base de données
+        $totalClients = 80; // Exemple : récupérer depuis la base de données
+        $servicesPlanifies = 3; // Exemple : récupérer depuis la base de données
+        $paiementsRecus = 14000; // Exemple : récupérer depuis la base de données
+        $evaluationMoyenne = 4.5; // Exemple : récupérer depuis la base de données
+
         // Passer les données à la vue
-        return view('partner.dashboard', compact('agence'));
+        return view('Dashboard.partner.dashboard', compact(
+            'agence',
+            'totalReservations',
+            'totalRevenus',
+            'servicesActifs',
+            'reservationsEnAttente',
+            'totalClients',
+            'servicesPlanifies',
+            'paiementsRecus',
+            'evaluationMoyenne'
+        ));
     }
 }
