@@ -3,12 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Agence;
+use App\Models\Destination;
 
 class PageController extends Controller
 {
-    public function accueil()
+    /**
+     * Affiche la page d'accueil avec les dernières agences et destinations
+     */
+    public function Accueil()
     {
-        return view('page.index');
+        // Récupérer les 6 dernières agences
+        $latestAgencies = Agence::latest()->take(6)->get();
+        
+        // Récupérer les 6 dernières destinations
+        $latestDestinations = Destination::latest()->take(6)->get();
+        
+        return view('page.index', compact('latestAgencies', 'latestDestinations'));
     }
     public function about()
     {
@@ -21,10 +32,6 @@ class PageController extends Controller
     public function services()
     {
         return view('page.services');
-    }
-    public function agence()
-    {
-        return view('page.agence');
     }
     
     public function booking()

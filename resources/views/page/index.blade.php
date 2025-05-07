@@ -113,16 +113,65 @@
 <div class="container-fluid bg-light service py-5">
     <div class="container py-5">
         <div class="mx-auto text-center mb-5" style="max-width: 900px;">
-            <h5 class="section-title px-3">Nos Agences Partenaires </h5>
-            <h1 class="mb-0">Decouvrez nos agences partenaires</h1>
+            <h5 class="section-title px-3">Nos Agences Partenaires</h5>
+            <h1 class="mb-0">Découvrez nos agences partenaires</h1>
         </div>
-        <div class="owl-carousel">
-            <div class="item"><img src="img/agency-1.jpg" class="img-fluid rounded" alt="Agence 1"></div>
-            <div class="item"><img src="img/agency-2.jpg" class="img-fluid rounded" alt="Agence 2"></div>
-            <div class="item"><img src="img/agency-3.jpg" class="img-fluid rounded" alt="Agence 3"></div>
-            <div class="item"><img src="image4.jpg" alt="Image 4"></div>
-            <div class="item"><img src="image5.jpg" alt="Image 5"></div>
-            <div class="item"><img src="image6.jpg" alt="Image 6"></div>
+        
+        <!-- Carousel des agences -->
+        <div id="agencesCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                @php $chunks = $latestAgencies->chunk(3); @endphp
+                @foreach($chunks as $index => $chunk)
+                    <button type="button" data-bs-target="#agencesCarousel" data-bs-slide-to="{{ $index }}" class="{{ $index == 0 ? 'active' : '' }}" aria-current="{{ $index == 0 ? 'true' : 'false' }}" aria-label="Slide {{ $index + 1 }}"></button>
+                @endforeach
+            </div>
+            
+            <div class="carousel-inner">
+                @foreach($chunks as $index => $agencyChunk)
+                    <div class="carousel-item {{ $index == 0 ? 'active' : '' }}">
+                        <div class="row g-4">
+                            @foreach($agencyChunk as $agency)
+                                <div class="col-md-4">
+                                    <div class="card h-100 shadow-sm agency-card">
+                                        <div class="position-relative">
+                                            @if($agency->agency_photo)
+                                                <img src="{{ asset('storage/' . $agency->agency_photo) }}" class="card-img-top" alt="{{ $agency->agency_name }}" style="height: 200px; object-fit: cover;">
+                                            @else
+                                                <img src="{{ asset('images/default-agency.jpg') }}" class="card-img-top" alt="Agence par défaut" style="height: 200px; object-fit: cover;">
+                                            @endif
+                                            <div class="position-absolute top-0 end-0 p-2">
+                                                @if($agency->agency_logo)
+                                                    <img src="{{ asset('storage/' . $agency->agency_logo) }}" class="rounded-circle bg-white p-1" alt="Logo" style="width: 60px; height: 60px; object-fit: contain;">
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">{{ $agency->agency_name }}</h5>
+                                            <p class="card-text">
+                                                <span class="badge bg-primary">{{ $agency->agency_type }}</span>
+                                            </p>
+                                            <a href="{{ url('/agence/' . $agency->id) }}" class="btn btn-outline-primary">Voir les offres</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+            
+            <button class="carousel-control-prev" type="button" data-bs-target="#agencesCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon bg-primary rounded-circle p-2" aria-hidden="true"></span>
+                <span class="visually-hidden">Précédent</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#agencesCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon bg-primary rounded-circle p-2" aria-hidden="true"></span>
+                <span class="visually-hidden">Suivant</span>
+            </button>
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{{ url('/agence') }}" class="btn btn-primary rounded-pill py-3 px-5">Voir toutes les agences</a>
         </div>
     </div>
 </div>
@@ -208,71 +257,34 @@
         <div class="tab-class text-center">
             <div class="tab-content">
                 <div id="tab-1" class="tab-pane fade show p-0 active">
-                    <div class="row g-4 ">
-                        <div class="col-lg-4">
-                            <div class="destination-img">
-                                <img class="img-fluid rounded w-100" src="img/destination-1.jpg" alt="Yaoundé">
-                                <div class="destination-overlay p-4">
-                                    <a href="#" class="btn btn-primary text-white rounded-pill border py-2 px-3">20 Agence</a>
-                                    <h4 class="text-white mb-2 mt-3">Yaoundé</h4>
-                                    <a href="#" class="btn-hover text-white">Voir Plus <i class="fa fa-arrow-right ms-2"></i></a>
+                    <div class="row g-4">
+                        @forelse($latestDestinations as $destination)
+                            <div class="col-lg-4 col-md-6 mb-4">
+                                <div class="destination-img">
+                                    @if($destination->image_url)
+                                        <img class="img-fluid rounded w-100" src="{{ asset('storage/' . $destination->image_url) }}" alt="{{ $destination->ville }}" style="height: 250px; object-fit: cover;">
+                                    @else
+                                        <img class="img-fluid rounded w-100" src="{{ asset('images/default-destination.jpg') }}" alt="Destination par défaut" style="height: 250px; object-fit: cover;">
+                                    @endif
+                                    <div class="destination-overlay p-4">
+                                        <a href="{{ url('/agence') }}" class="btn btn-primary text-white rounded-pill border py-2 px-3">Voir les agences</a>
+                                        <h4 class="text-white mb-2 mt-3">{{ $destination->ville }}</h4>
+                                        <a href="{{ url('/agence') }}" class="btn-hover text-white">Voir Plus <i class="fa fa-arrow-right ms-2"></i></a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="destination-img">
-                                <img class="img-fluid rounded w-100" src="img/destination-2.jpg" alt="Douala">
-                                <div class="destination-overlay p-4">
-                                    <a href="#" class="btn btn-primary text-white rounded-pill border py-2 px-3">15 Agence</a>
-                                    <h4 class="text-white mb-2 mt-3">Douala</h4>
-                                    <a href="#" class="btn-hover text-white">Voir Plus <i class="fa fa-arrow-right ms-2"></i></a>
-                                </div>
+                        @empty
+                            <div class="col-12 text-center">
+                                <p>Aucune destination disponible pour le moment.</p>
                             </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="destination-img">
-                                <img class="img-fluid rounded w-100" src="img/destination-3.jpg" alt="Kribi">
-                                <div class="destination-overlay p-4">
-                                    <a href="#" class="btn btn-primary text-white rounded-pill border py-2 px-3">10 Agence</a>
-                                    <h4 class="text-white mb-2 mt-3">Kribi</h4>
-                                    <a href="#" class="btn-hover text-white">Voir Plus <i class="fa fa-arrow-right ms-2"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="destination-img">
-                                <img class="img-fluid rounded w-100" src="img/destination-4.jpg" alt="Garoua">
-                                <div class="destination-overlay p-4">
-                                    <a href="#" class="btn btn-primary text-white rounded-pill border py-2 px-3">12 Agence</a>
-                                    <h4 class="text-white mb-2 mt-3">Garoua</h4>
-                                    <a href="#" class="btn-hover text-white">Voir Plus <i class="fa fa-arrow-right ms-2"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="destination-img">
-                                <img class="img-fluid rounded w-100" src="img/destination-5.jpg" alt="Bafoussam">
-                                <div class="destination-overlay p-4">
-                                    <a href="#" class="btn btn-primary text-white rounded-pill border py-2 px-3">18 Agence</a>
-                                    <h4 class="text-white mb-2 mt-3">Bafoussam</h4>
-                                    <a href="#" class="btn-hover text-white">Voir Plus <i class="fa fa-arrow-right ms-2"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="destination-img">
-                                <img class="img-fluid rounded w-100" src="img/destination-6.jpg" alt="Buea">
-                                <div class="destination-overlay p-4">
-                                    <a href="#" class="btn btn-primary text-white rounded-pill border py-2 px-3">14 Agence</a>
-                                    <h4 class="text-white mb-2 mt-3">Buea</h4>
-                                    <a href="#" class="btn-hover text-white">Voir Plus <i class="fa fa-arrow-right ms-2"></i></a>
-                                </div>
-                            </div>
-                        </div>
+                        @endforelse
                     </div>
                 </div>
                 <!-- Other tabs remain unchanged -->
             </div>
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ url('/destinations') }}" class="btn btn-primary rounded-pill py-3 px-5">Voir toutes les destinations</a>
         </div>
     </div>
 </div>
@@ -452,8 +464,92 @@
 
     <!-- Scripts -->
     @include('includes.script')
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialisation du carousel avec options
+        var agencesCarousel = new bootstrap.Carousel(document.getElementById('agencesCarousel'), {
+            interval: 5000,  // Temps entre les slides en millisecondes
+            wrap: true,      // Boucle infinie
+            keyboard: true   // Contrôle avec le clavier
+        });
+        
+        // Pause au survol (optionnel)
+        document.getElementById('agencesCarousel').addEventListener('mouseenter', function() {
+            agencesCarousel.pause();
+        });
+        
+        document.getElementById('agencesCarousel').addEventListener('mouseleave', function() {
+            agencesCarousel.cycle();
+        });
+    });
+</script>
+<style>
+    /* Styles existants */
+    .agency-card {
+        transition: transform 0.3s ease;
+        overflow: hidden;
+        margin: 0 10px;
+    }
     
-
+    .agency-card:hover {
+        transform: translateY(-10px);
+    }
+    
+    /* Nouveaux styles pour le carousel */
+    #agencesCarousel {
+        padding-bottom: 50px;
+    }
+    
+    #agencesCarousel .carousel-indicators {
+        bottom: 0;
+    }
+    
+    #agencesCarousel .carousel-indicators button {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #ccc;
+        margin: 0 5px;
+    }
+    
+    #agencesCarousel .carousel-indicators button.active {
+        background-color: #13357B;
+    }
+    
+    #agencesCarousel .carousel-control-prev,
+    #agencesCarousel .carousel-control-next {
+        width: 40px;
+        height: 40px;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 1;
+    }
+    
+    #agencesCarousel .carousel-control-prev {
+        left: -50px;
+    }
+    
+    #agencesCarousel .carousel-control-next {
+        right: -50px;
+    }
+    
+    #agencesCarousel .carousel-control-prev-icon,
+    #agencesCarousel .carousel-control-next-icon {
+        width: 30px;
+        height: 30px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        #agencesCarousel .carousel-control-prev {
+            left: 0;
+        }
+        
+        #agencesCarousel .carousel-control-next {
+            right: 0;
+        }
+    }
+</style>
 </body>
 
 </html>

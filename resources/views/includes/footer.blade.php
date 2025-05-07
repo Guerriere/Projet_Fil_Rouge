@@ -19,7 +19,7 @@
                     <div class="col-md-6 col-lg-6 col-xl-3">
                         <div class="footer-item d-flex flex-column">
                             <h4 class="mb-4 text-white">Liens Rapides</h4>
-                            <a href="{{ url('/accueil') }}"><i class="fas fa-angle-right me-2"></i> Accueil</a>
+                            <a href="{{ url('/') }}"><i class="fas fa-angle-right me-2"></i> Accueil</a>
                             <a href="{{ url('/about') }}"><i class="fas fa-angle-right me-2"></i> Apropos</a>
                             <a href="{{ url('/agence') }}"><i class="fas fa-angle-right me-2"></i>Agences</a>
                             <a href="{{ url('/services') }}"><i class="fas fa-angle-right me-2"></i> Services</a>

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Reservation extends Model
 {
@@ -17,16 +18,19 @@ class Reservation extends Model
     protected $table = 'reservations';
 
     /**
-     * The attributes that are mass assignable.
+     * Les attributs qui peuvent être assignés en masse.
      *
      * @var array
      */
     protected $fillable = [
-        'user_id',
         'voyage_id',
-        'nombre_personnes',
+        'user_id',
+        'nom',
+        'email',
+        'telephone',
+        'nombre_places',
+        'montant_total',
         'statut',
-        'date_reservation',
     ];
 
     /**
@@ -40,7 +44,7 @@ class Reservation extends Model
     ];
 
     /**
-     * Get the user associated with the reservation.
+     * Relation avec le modèle User.
      */
     public function user()
     {
@@ -48,7 +52,7 @@ class Reservation extends Model
     }
 
     /**
-     * Get the voyage associated with the reservation.
+     * Relation avec le modèle Voyage.
      */
     public function voyage()
     {
@@ -58,5 +62,39 @@ class Reservation extends Model
     public function paiement()
     {
         return $this->hasOne(Paiement::class);
+    }
+    
+    /**
+     * Vérifie si la réservation est annulable.
+     */
+    public function estAnnulable()
+    {
+        // Une réservation est annulable si elle est en attente et que la date de départ est dans le futur
+        return $this->statut === 'en_attente' && 
+               Carbon::parse($this->voyage->date_depart)->isFuture();
+    }
+    
+    /**
+     * Vérifie si la réservation est à venir.
+     */
+    public function estAVenir()
+    {
+        return Carbon::parse($this->voyage->date_depart)->isFuture();
+    }
+    
+    /**
+     * Vérifie si la réservation est passée.
+     */
+    public function estPassee()
+    {
+        return Carbon::parse($this->voyage->date_depart)->isPast();
+    }
+    
+    /**
+     * Génère un numéro de référence pour la réservation.
+     */
+    public function getReference()
+    {
+        return 'TC-' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
     }
 }

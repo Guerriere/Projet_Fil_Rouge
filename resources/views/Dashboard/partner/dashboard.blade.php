@@ -1,5 +1,5 @@
 <!-- filepath: /home/kali/Insclass/PROJET_LARAVEL/Projet_Fil_Rouge/resources/views/Dashboard/partner/dashboard.blade.php -->
-@extends('administration.layouts.app')
+@extends('Dashboard.layouts.app')
 
 @section('title', 'Tableau de Bord Partenaire')
 

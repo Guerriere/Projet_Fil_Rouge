@@ -4,152 +4,113 @@ namespace App\Http\Controllers;
 
 use App\Models\Destination;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class DestinationController extends Controller
 {
     /**
-     * Display a listing of the destinations.
-     *
-     * @return \Illuminate\View\View
+     * Affiche la liste des destinations.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $destinations = Destination::all();
-        return view('administration.gestionnaire.destinations.index', compact('destinations'));
+        $search = $request->input('search');
+
+        $destinations = Destination::when($search, function ($query, $search) {
+            return $query->where('description', 'like', "%{$search}%")
+                         ->orWhere('ville', 'like', "%{$search}%");
+        })->paginate(10); // Limite à 10 résultats par page
+
+        return view('Dashboard.partner.destinations.list', compact('destinations'));
     }
 
     /**
-     * Show the form for creating a new destination.
-     *
-     * @return \Illuminate\View\View
+     * Affiche le formulaire pour ajouter une destination.
      */
     public function create()
     {
-        $pays = $this->getPaysList(); // Liste des pays pour le formulaire
-        $timezones = $this->getTimezonesList(); // Liste des fuseaux horaires
-        return view('administration.gestionnaire.destinations.create', compact('pays', 'timezones'));
+        return view('Dashboard.partner.destinations.add');
     }
 
     /**
-     * Store a newly created destination in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * Enregistre une nouvelle destination.
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
+            'description' => 'nullable|string|max:255',
             'ville' => 'required|string|max:255',
-            'pays' => 'required|string|max:255',
-            'code_aeroport' => 'required|string|max:5|unique:destinations,code_aeroport',
-            'description' => 'nullable|string',
-            'attractions' => 'nullable|string',
-            'statut' => 'required|in:actif,inactif',
-            'image_url' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        if ($request->hasFile('image_url')) {
-            $validated['image_url'] = $request->file('image_url')->store('destinations', 'public');
-        }
+        $imagePath = $request->file('image') ? $request->file('image')->store('destinations', 'public') : null;
 
-        Destination::create($validated);
+        Destination::create([
+            'user_id' => auth()->id(), // Associe la destination à l'utilisateur connecté
+            'description' => $request->description,
+            'ville' => $request->ville,
+            'image_url' => $imagePath,
+        ]);
 
-        return redirect()->route('manager.destinations.index')->with('success', 'Destination créée avec succès.');
+        return redirect()->route('partner.destinations.list')->with('success', 'Destination ajoutée avec succès.');
     }
 
     /**
-     * Show the form for editing the specified destination.
-     *
-     * @param  \App\Models\Destination  $destination
-     * @return \Illuminate\View\View
+     * Affiche le formulaire pour modifier une destination.
      */
-    public function edit(Destination $destination)
+    public function edit($id)
     {
-        $pays = $this->getPaysList(); // Liste des pays pour le formulaire
-        $timezones = $this->getTimezonesList(); // Liste des fuseaux horaires
-        return view('administration.gestionnaire.destinations.edit', compact('destination', 'pays', 'timezones'));
+        $destination = Destination::findOrFail($id);
+        return view('Dashboard.partner.destinations.edit', compact('destination'));
     }
 
     /**
-     * Update the specified destination in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Destination  $destination
-     * @return \Illuminate\Http\RedirectResponse
+     * Met à jour une destination existante.
      */
-    public function update(Request $request, Destination $destination)
+    public function update(Request $request, $id)
     {
-        $validated = $request->validate([
+        $request->validate([
+            'description' => 'nullable|string|max:255',
             'ville' => 'required|string|max:255',
-            'pays' => 'required|string|max:255',
-            'code_aeroport' => 'required|string|max:5|unique:destinations,code_aeroport,' . $destination->id,
-            'description' => 'nullable|string',
-            'attractions' => 'nullable|string',
-            'statut' => 'required|in:actif,inactif',
-            'image_url' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        if ($request->hasFile('image_url')) {
-            // Supprimer l'ancienne image si elle existe
+        $destination = Destination::findOrFail($id);
+
+        // Mettre à jour l'image si une nouvelle est fournie
+        if ($request->hasFile('image')) {
+            // Supprimer l'ancienne image
             if ($destination->image_url) {
-                \Storage::disk('public')->delete($destination->image_url);
+                Storage::disk('public')->delete($destination->image_url);
             }
-            $validated['image_url'] = $request->file('image_url')->store('destinations', 'public');
+
+            // Enregistrer la nouvelle image
+            $imagePath = $request->file('image')->store('destinations', 'public');
+            $destination->image_url = $imagePath;
         }
 
-        $destination->update($validated);
+        // Mettre à jour les autres champs
+        $destination->update([
+            'description' => $request->description,
+            'ville' => $request->ville,
+        ]);
 
-        return redirect()->route('manager.destinations.index')->with('success', 'Destination mise à jour avec succès.');
+        return redirect()->route('partner.destinations.list')->with('success', 'Destination mise à jour avec succès.');
     }
 
     /**
-     * Remove the specified destination from storage.
-     *
-     * @param  \App\Models\Destination  $destination
-     * @return \Illuminate\Http\RedirectResponse
+     * Supprime une destination.
      */
-    public function destroy(Destination $destination)
+    public function destroy($id)
     {
+        $destination = Destination::findOrFail($id);
+
+        // Supprimer l'image associée
         if ($destination->image_url) {
-            \Storage::disk('public')->delete($destination->image_url);
+            Storage::disk('public')->delete($destination->image_url);
         }
 
         $destination->delete();
 
-        return redirect()->route('manager.destinations.index')->with('success', 'Destination supprimée avec succès.');
-    }
-
-    /**
-     * Get the list of countries for the form.
-     *
-     * @return array
-     */
-    private function getPaysList()
-    {
-        return [
-            'FR' => 'France',
-            'US' => 'États-Unis',
-            'CM' => 'Cameroun',
-            'DE' => 'Allemagne',
-            'JP' => 'Japon',
-            // Ajoutez d'autres pays ici
-        ];
-    }
-
-    /**
-     * Get the list of timezones for the form.
-     *
-     * @return array
-     */
-    private function getTimezonesList()
-    {
-        return [
-            'UTC' => 'UTC',
-            'Europe/Paris' => 'Europe/Paris',
-            'America/New_York' => 'America/New_York',
-            'Africa/Douala' => 'Africa/Douala',
-            'Asia/Tokyo' => 'Asia/Tokyo',
-            // Ajoutez d'autres fuseaux horaires ici
-        ];
+        return redirect()->route('partner.destinations.list')->with('success', 'Destination supprimée avec succès.');
     }
 }

@@ -7,43 +7,69 @@ use Illuminate\Database\Eloquent\Model;
 
 class Voyage extends Model
 {
+    use HasFactory;
+
+    /**
+     * Les attributs qui peuvent être assignés en masse.
+     *
+     * @var array
+     */
     protected $fillable = [
         'agence_id',
-        'destination_id',
-        'titre',
-        'description',
+        'destination_depart_id',
+        'destination_arrive_id',
         'date_depart',
-        'date_retour',
-        'ville_depart',
-        'quartier_depart',
-        'adresse_depart',
-        'prix',
-        'places_disponibles',
-        'image_url'
+        'heure_depart',
+        'montant',
+        'nbre_place',
+        'statut',
     ];
 
+    /**
+     * Relation avec le modèle Agence.
+     */
     public function agence()
     {
         return $this->belongsTo(Agence::class);
     }
 
-    public function destination()
+    /**
+     * Relation avec la destination de départ.
+     */
+    public function destinationDepart()
     {
-        return $this->belongsTo(Destination::class);
+        return $this->belongsTo(Destination::class, 'destination_depart_id');
     }
 
+    /**
+     * Relation avec la destination d'arrivée.
+     */
+    public function destinationArrive()
+    {
+        return $this->belongsTo(Destination::class, 'destination_arrive_id');
+    }
+    
+    /**
+     * Relation avec les réservations.
+     */
     public function reservations()
     {
         return $this->hasMany(Reservation::class);
     }
-
-    public function avis()
+    
+    /**
+     * Vérifie si le voyage est complet (plus de places disponibles).
+     */
+    public function estComplet()
     {
-        return $this->hasMany(Avis::class);
+        return $this->nbre_place <= 0;
     }
-
-    public function images()
+    
+    /**
+     * Vérifie si le voyage est à venir.
+     */
+    public function estAVenir()
     {
-        return $this->hasMany(ImageVoyage::class);
+        return now()->startOfDay()->lte(\Carbon\Carbon::parse($this->date_depart));
     }
 }

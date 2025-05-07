@@ -13,10 +13,14 @@ return new class extends Migration
     {
         Schema::create('destinations', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id'); // Ajout de la colonne user_id
             $table->text('description')->nullable();
             $table->string('ville');
             $table->string('image_url')->nullable();
             $table->timestamps();
+    
+            // Clé étrangère vers la table users
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

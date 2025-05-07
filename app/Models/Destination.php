@@ -22,6 +22,7 @@ class Destination extends Model
      * @var array
      */
     protected $fillable = [
+        'user_id',
         'description',
         'ville',
         'image_url',
@@ -33,5 +34,13 @@ class Destination extends Model
     public function voyages()
     {
         return $this->hasMany(Voyage::class);
+    }
+
+    /**
+     * Relation avec le modèle User.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

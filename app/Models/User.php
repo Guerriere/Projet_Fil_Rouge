@@ -98,6 +98,26 @@ class User extends Authenticatable
     {
         return $this->hasMany(Avis::class);
     }
+
+    /**
+     * Relation avec le modèle Agence.
+     *
+     * Un utilisateur peut avoir plusieurs agences.
+     */
+    public function agences()
+    {
+        return $this->hasMany(Agence::class);
+    }
+
+    /**
+     * Récupère une agence unique associée à l'utilisateur.
+     *
+     * Si un utilisateur ne peut avoir qu'une seule agence active, utilisez cette méthode.
+     */
+    public function agence()
+    {
+        return $this->hasOne(Agence::class);
+    }
 }
 
 

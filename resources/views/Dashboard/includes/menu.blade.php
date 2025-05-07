@@ -1,40 +1,186 @@
-<!-- filepath: /home/kali/Insclass/PROJET_LARAVEL/Projet_Fil_Rouge/resources/views/includes/menu.blade.php -->
-@if (Auth::check() && Auth::user()->isPartner())
-    <!-- Menu pour le partenaire -->
-    <aside class="w-64 bg-blue-800 text-white">
-        <div class="p-4">
-            <h1 class="text-xl font-bold">TravelPro</h1>
-            <p class="text-sm text-blue-200">Espace Partenaire</p>
-        </div>
-        <nav class="mt-6">
-            <a href="#dashboard" class="flex items-center py-3 px-4 bg-blue-900 text-white">
-                <i class="fas fa-tachometer-alt mr-3"></i>
-                <span>Tableau de bord</span>
-            </a>
-            <a href="#offers" class="flex items-center py-3 px-4 hover:bg-blue-900 text-blue-200 hover:text-white">
-                <i class="fas fa-luggage-cart mr-3"></i>
-                <span>Offres et services</span>
-            </a>
-            <a href="#reservations" class="flex items-center py-3 px-4 hover:bg-blue-900 text-blue-200 hover:text-white">
-                <i class="fas fa-calendar-check mr-3"></i>
-                <span>Réservations</span>
-            </a>
-            <a href="#payments" class="flex items-center py-3 px-4 hover:bg-blue-900 text-blue-200 hover:text-white">
-                <i class="fas fa-money-bill-wave mr-3"></i>
-                <span>Paiements</span>
-            </a>
-            <a href="#communication" class="flex items-center py-3 px-4 hover:bg-blue-900 text-blue-200 hover:text-white">
-                <i class="fas fa-comments mr-3"></i>
-                <span>Communication</span>
-            </a>
-            <a href="#profile" class="flex items-center py-3 px-4 hover:bg-blue-900 text-blue-200 hover:text-white">
-                <i class="fas fa-user-cog mr-3"></i>
-                <span>Profil</span>
-            </a>
-            <a href="#reports" class="flex items-center py-3 px-4 hover:bg-blue-900 text-blue-200 hover:text-white">
-                <i class="fas fa-chart-line mr-3"></i>
-                <span>Statistiques</span>
-            </a>
+<aside class="left-sidebar">
+    <div class="scroll-sidebar">
+        <nav class="sidebar-nav">
+            <ul id="sidebarnav">
+                @if (Auth::check())
+                    <!-- Menu pour le client -->
+                    @if (Auth::user()->role === 'client')
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark" href="{{ route('client.dashboard') }}">
+                                <i class="mdi mdi-view-dashboard"></i>
+                                <span class="hide-menu">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)">
+                                <i class="mdi mdi-calendar-check"></i>
+                                <span class="hide-menu">Mes Réservations</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a href="{{ route('client.reservations.add') }}" class="sidebar-link">
+                                        <i class="mdi mdi-plus-circle"></i>
+                                        <span class="hide-menu">Ajouter</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a href="{{ route('client.reservations.list') }}" class="sidebar-link">
+                                        <i class="mdi mdi-format-list-bulleted"></i>
+                                        <span class="hide-menu">Lister</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)">
+                                <i class="mdi mdi-account"></i>
+                                <span class="hide-menu">Profil</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a href="{{ route('client.profile') }}" class="sidebar-link">
+                                        <i class="mdi mdi-account-circle"></i>
+                                        <span class="hide-menu">Mes Infos</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark" href="{{ route('logout') }}"
+                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                <i class="mdi mdi-logout"></i>
+                                <span class="hide-menu">Déconnexion</span>
+                            </a>
+                        </li>
+                    @endif
+
+                    <!-- Menu pour le partenaire -->
+                    @if (Auth::user()->role === 'partenaire')
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark" href="{{ route('partner.dashboard') }}">
+                                <i class="mdi mdi-view-dashboard"></i>
+                                <span class="hide-menu">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)">
+                                <i class="mdi mdi-luggage"></i>
+                                <span class="hide-menu">Offres</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a href="{{ route('partner.offers.add') }}" class="sidebar-link">
+                                        <i class="mdi mdi-plus-circle"></i>
+                                        <span class="hide-menu">Ajouter</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a href="{{ route('partner.offers.list') }}" class="sidebar-link">
+                                        <i class="mdi mdi-format-list-bulleted"></i>
+                                        <span class="hide-menu">Lister</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)">
+                                <i class="mdi mdi-map-marker"></i>
+                                <span class="hide-menu">Destinations</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a href="{{ route('partner.destinations.add') }}" class="sidebar-link">
+                                        <i class="mdi mdi-plus-circle"></i>
+                                        <span class="hide-menu">Ajouter</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a href="{{ route('partner.destinations.list') }}" class="sidebar-link">
+                                        <i class="mdi mdi-format-list-bulleted"></i>
+                                        <span class="hide-menu">Lister</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)">
+                                <i class="mdi mdi-account-multiple"></i>
+                                <span class="hide-menu">Clients</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a href="{{ route('partner.clients.add') }}" class="sidebar-link">
+                                        <i class="mdi mdi-plus-circle"></i>
+                                        <span class="hide-menu">Ajouter</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a href="{{ route('partner.clients.list') }}" class="sidebar-link">
+                                        <i class="mdi mdi-format-list-bulleted"></i>
+                                        <span class="hide-menu">Lister</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)">
+                                <i class="mdi mdi-cash"></i>
+                                <span class="hide-menu">Paiements</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a href="{{ route('partner.payments.list') }}" class="sidebar-link">
+                                        <i class="mdi mdi-format-list-bulleted"></i>
+                                        <span class="hide-menu">Lister</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)">
+                                <i class="mdi mdi-comment"></i>
+                                <span class="hide-menu">Avis</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a href="{{ route('partner.reviews.list') }}" class="sidebar-link">
+                                        <i class="mdi mdi-format-list-bulleted"></i>
+                                        <span class="hide-menu">Lister</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    @endif
+
+                    <!-- Menu pour l'administrateur -->
+                    @if (Auth::user()->role === 'admin')
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)">
+                                <i class="mdi mdi-account-tie"></i>
+                                <span class="hide-menu">Partenaires</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a href="{{ route('admin.partners.add') }}" class="sidebar-link">
+                                        <i class="mdi mdi-plus-circle"></i>
+                                        <span class="hide-menu">Ajouter</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a href="{{ route('admin.partners.list') }}" class="sidebar-link">
+                                        <i class="mdi mdi-format-list-bulleted"></i>
+                                        <span class="hide-menu">Lister</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    @endif
+                @endif
+            </ul>
         </nav>
-    </aside>
-@endif
+    </div>
+</aside>
+
+<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+    @csrf
+</form>

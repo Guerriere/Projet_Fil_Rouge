@@ -27,7 +27,29 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
-        return redirect()->intended(route('dashboard', absolute: false));
+        
+        // Récupérer l'utilisateur authentifié
+        $user = Auth::user();
+        
+        // Vérifier s'il y a un voyage en attente de réservation
+        if ($request->has('intended_voyage_id')) {
+            $voyageId = $request->input('intended_voyage_id');
+            return redirect()->route('agence.show.voyage', $voyageId)
+                             ->with('success', 'Vous êtes maintenant connecté. Vous pouvez réserver votre voyage.');
+        }
+        
+        // Redirection par défaut selon le rôle
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->isPartner()) {
+            return redirect()->route('partner.dashboard');
+        } elseif ($user->isClient()) {
+            // Rediriger les clients vers leur tableau de bord
+            return redirect()->route('client.dashboard');
+        } else {
+            // Fallback pour tout autre rôle
+            return redirect()->route('accueil');
+        }
     }
 
     /**

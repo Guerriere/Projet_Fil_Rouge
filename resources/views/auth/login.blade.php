@@ -52,6 +52,10 @@
         <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Se connecter</h2>
         <form method="POST" action="{{ route('login') }}" class="space-y-6">
             @csrf
+            <!-- Ajouter ceci dans le formulaire de connexion -->
+            @if(request()->has('intended_voyage_id'))
+                <input type="hidden" name="intended_voyage_id" value="{{ request()->input('intended_voyage_id') }}">
+            @endif
             <!-- Email -->
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-700">Adresse email</label>

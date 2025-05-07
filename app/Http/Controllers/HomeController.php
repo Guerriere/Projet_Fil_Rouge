@@ -18,8 +18,8 @@ class HomeController extends Controller
             return redirect()->route('admin.dashboard');
         } elseif ($user->role === 'partenaire') {
             return redirect()->route('partner.dashboard');
-        } elseif ($user->role === 'gestionnaire') {
-            return redirect()->route('manager.dashboard');
+        } elseif ($user->role === 'client') {
+            return redirect()->route('dashboard');
         }
 
         // Default redirection for other roles or guests

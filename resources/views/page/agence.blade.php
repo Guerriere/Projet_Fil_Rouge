@@ -6,20 +6,84 @@
 
 <style>
     .banner-agence {
-    background: url('../images/agence2.jpg') no-repeat center center;
-    background-size: cover;
-    height: 500px;
-    position: relative;
-}
+        background: url('../images/agence2.jpg') no-repeat center center;
+        background-size: cover;
+        height: 500px;
+        position: relative;
+    }
 
-.banner-overlay {
-    background: rgba(0, 0, 0, 0.5);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
+    .banner-overlay {
+        background: rgba(0, 0, 0, 0.5);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .agency-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .agency-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .agency-img {
+        height: 200px;
+        object-fit: cover;
+        transition: all 0.5s ease;
+    }
+    
+    .agency-card:hover .agency-img {
+        transform: scale(1.05);
+    }
+    
+    .pagination {
+        margin-bottom: 0;
+    }
+    
+    .page-item.active .page-link {
+        background-color: #13357B;
+        border-color: #13357B;
+    }
+    
+    .page-link {
+        color: #13357B;
+    }
+    
+    .page-link:hover {
+        color: #0a1b3f;
+    }
+    
+    .loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+    
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #13357B;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
 
 <body class="bg-light">
@@ -27,53 +91,98 @@
     @include('includes.navbar')
 
     <!-- Bannière Nos Agences -->
-    <div class="container-fluid position-relative banner-agence" >
-    <!-- Superposition sombre -->
-    <div class="banner-overlay" style="background: rgba(0, 0, 0, 0.5);"></div>
-    
-    <!-- Contenu centré -->
-    <div class="text-center text-white position-relative d-flex flex-column justify-content-center align-items-center h-100">
-        <h3 class="display-3 text-white mb-4"> Nos agence </h3>
+    <div class="container-fluid position-relative banner-agence">
+        <!-- Superposition sombre -->
+        <div class="banner-overlay" style="background: rgba(0, 0, 0, 0.5);"></div>
         
+        <!-- Contenu centré -->
+        <div class="text-center text-white position-relative d-flex flex-column justify-content-center align-items-center h-100">
+            <h3 class="display-3 text-white mb-4">Nos agences</h3>
+        </div>
     </div>
-</div>
+
     <!-- Section : Filtres -->
     <div class="container py-5">
-        <div class="row mb-4">
-            <div class="col-md-6 mb-3">
-                <select class="form-select">
-                    <option value="">Toutes les régions</option>
-                    <option value="douala">Littoral</option>
-                    <option value="yaounde">Centre</option>
-                    <option value="bafoussam">Ouest</option>
-                    <option value="garoua">Nord</option>
-                </select>
-            </div>
-            <div class="col-md-6 mb-3">
-                <input type="text" class="form-control" placeholder="Rechercher une ville...">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Rechercher une agence par destination</h5>
+                <form action="{{ route('agence.index') }}" method="GET" class="row g-3">
+                    <div class="col-md-8">
+                        <input type="text" name="destination" id="destination-search" class="form-control" 
+                               placeholder="Entrez une ville de destination..." 
+                               value="{{ request('destination') }}"
+                               list="destination-list">
+                        <datalist id="destination-list">
+                            @foreach($villes as $ville)
+                                <option value="{{ $ville }}">
+                            @endforeach
+                        </datalist>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i> Rechercher
+                        </button>
+                    </div>
+                </form>
+                @if(request('destination'))
+                    <div class="mt-3">
+                        <a href="{{ route('agence.index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i> Effacer le filtre
+                        </a>
+                        <span class="ms-3 text-muted">
+                            Résultats pour : <strong>{{ request('destination') }}</strong>
+                        </span>
+                    </div>
+                @endif
             </div>
         </div>
 
+        <!-- Messages flash -->
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         <!-- Liste des agences -->
-        <div id="agences-container" class="row g-4">
-            <!-- Les agences seront injectées ici via JavaScript -->
+        <div class="row g-4">
+            @forelse($agences as $agence)
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm agency-card">
+                        <img src="{{ asset('storage/' . $agence->agency_photo) }}" class="card-img-top agency-img" alt="{{ $agence->agency_name }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ $agence->agency_name }}</h5>
+                            <p class="card-text">
+                                <span class="badge bg-primary">{{ $agence->agency_type }}</span>
+                            </p>
+                            <p class="card-text">
+                                <i class="fas fa-phone text-primary me-2"></i> {{ $agence->phone_pro }}
+                            </p>
+                            <p class="card-text">
+                                <i class="fas fa-envelope text-primary me-2"></i> {{ $agence->email_pro }}
+                            </p>
+                            <a href="{{ route('agence.show', $agence->id) }}" class="btn btn-primary w-100">Voir les offres</a>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col-12 text-center py-5">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        @if(request('destination'))
+                            Aucune agence trouvée pour la destination "{{ request('destination') }}".
+                        @else
+                            Aucune agence disponible pour le moment.
+                        @endif
+                    </div>
+                </div>
+            @endforelse
         </div>
 
         <!-- Pagination -->
-        <nav class="mt-4">
-            <ul class="pagination justify-content-center" id="pagination-numbers">
-                <!-- Les numéros de page seront injectés ici -->
-            </ul>
-        </nav>
-    </div>
-
-    <!-- Carte Google Maps -->
-    <div class="container-fluid">
-        <div class="rounded overflow-hidden">
-            <iframe class="rounded w-100" 
-                style="height: 450px;" 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3978.5123456789!2d9.7085!3d4.0511!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x10610d123456789%3A0xabcdef123456789!2sDouala%2C%20Cameroun!5e0!3m2!1sfr!2sfr!4v1694259649153!5m2!1sfr!2sfr" 
-                loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <div class="d-flex justify-content-center mt-4">
+            {{ $agences->appends(request()->query())->links() }}
         </div>
     </div>
 
@@ -81,79 +190,33 @@
     @include('includes.footer')
 
     @include('includes.script')
-
-    <script>
-        // Données des agences (simulées pour la démonstration)
-        const agences = Array.from({ length: 30 }, (_, i) => ({
-            id: i + 1,
-            nom: `Agence ${i + 1}`,
-            adresse: `${Math.floor(Math.random() * 100)} Rue de la ${['Paix', 'Liberté', 'République', 'Nation', 'Victoire'][Math.floor(Math.random() * 5)]}`,
-            codePostal: `${Math.floor(Math.random() * 90000) + 10000}`,
-            ville: ['Douala', 'Yaoundé', 'Bafoussam', 'Garoua', 'Kribi'][Math.floor(Math.random() * 5)],
-            telephone: `0${Math.floor(Math.random() * 9) + 1} ${Math.floor(Math.random() * 90) + 10} ${Math.floor(Math.random() * 90) + 10} ${Math.floor(Math.random() * 90) + 10} ${Math.floor(Math.random() * 90) + 10}`,
-            email: `contact.agence${i + 1}@travelcam.com`,
-            horaires: 'Lun-Ven: 9h-18h / Sam: 9h-12h',
-            image: `https://via.placeholder.com/500x300?text=Agence+${i + 1}`
-        }));
-
-        // Configuration de la pagination
-        const itemsPerPage = 9;
-        let currentPage = 1;
-        const totalPages = Math.ceil(agences.length / itemsPerPage);
-
-        // Fonction pour afficher les agences de la page courante
-        function displayAgences(page) {
-            const container = document.getElementById('agences-container');
-            container.innerHTML = '';
-            
-            const startIndex = (page - 1) * itemsPerPage;
-            const endIndex = Math.min(startIndex + itemsPerPage, agences.length);
-            
-            for (let i = startIndex; i < endIndex; i++) {
-                const agence = agences[i];
-                const agenceCard = document.createElement('div');
-                agenceCard.className = 'col-md-4';
-                agenceCard.innerHTML = `
-                    <div class="card h-100 shadow-sm">
-                        <img src="${agence.image}" class="card-img-top" alt="${agence.nom}">
-                        <div class="card-body">
-                            <h5 class="card-title">${agence.nom}</h5>
-                            <p class="card-text">${agence.adresse}, ${agence.codePostal} ${agence.ville}</p>
-                            <p class="card-text"><strong>Téléphone :</strong> ${agence.telephone}</p>
-                            <p class="card-text"><strong>Email :</strong> ${agence.email}</p>
-                            <p class="card-text"><strong>Horaires :</strong> ${agence.horaires}</p>
-                            <a href="#" class="btn btn-primary w-100">reservez maintenant</a>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(agenceCard);
-            }
-        }
-
-        // Fonction pour mettre à jour la pagination
-        function updatePagination() {
-            const paginationContainer = document.getElementById('pagination-numbers');
-            paginationContainer.innerHTML = '';
-            
-            for (let i = 1; i <= totalPages; i++) {
-                const li = document.createElement('li');
-                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
-                li.innerHTML = `<button class="page-link">${i}</button>`;
-                li.addEventListener('click', () => {
-                    currentPage = i;
-                    displayAgences(currentPage);
-                    updatePagination();
-                });
-                paginationContainer.appendChild(li);
-            }
-        }
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', () => {
-            displayAgences(currentPage);
-            updatePagination();
-        });
-    </script>
 </body>
 
 </html>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Afficher l'animation de chargement lors de la soumission du formulaire
+        const searchForm = document.querySelector('form');
+        searchForm.addEventListener('submit', function() {
+            // Créer et afficher l'animation de chargement
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.innerHTML = '<div class="loading-spinner"></div>';
+            document.body.appendChild(loadingDiv);
+        });
+        
+        // Amélioration de l'input de recherche
+        const searchInput = document.getElementById('destination-search');
+        if (searchInput) {
+            // Focus automatique sur le champ de recherche
+            searchInput.focus();
+            
+            // Effacer le champ avec la touche Escape
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    this.value = '';
+                }
+            });
+        }
+    });
+</script>

@@ -2,154 +2,182 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Destination;
 use Illuminate\Http\Request;
+use App\Models\Reservation;
+use App\Models\Voyage;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
     /**
-     * Display a listing of the destinations.
-     *
-     * @return \Illuminate\View\View
+     * Constructeur - Applique le middleware auth aux méthodes spécifiées
+     */
+    public function __construct()
+    {
+        $this->middleware('auth')->only(['store', 'index', 'show', 'cancel']);
+    }
+    
+    /**
+     * Affiche la liste des réservations de l'utilisateur connecté
      */
     public function index()
     {
-        $destinations = Destination::all();
-        return view('administration.gestionnaire.destinations.index', compact('destinations'));
+        $reservations = Reservation::where('user_id', Auth::id())
+                                  ->orderBy('created_at', 'desc')
+                                  ->paginate(10);
+        
+        return view('page.mes-reservations', compact('reservations'));
     }
-
+    
     /**
-     * Show the form for creating a new destination.
-     *
-     * @return \Illuminate\View\View
+     * Affiche le formulaire de réservation
      */
-    public function create()
+    public function create(Voyage $voyage)
     {
-        $pays = $this->getPaysList(); // Liste des pays pour le formulaire
-        $timezones = $this->getTimezonesList(); // Liste des fuseaux horaires
-        return view('administration.gestionnaire.destinations.create', compact('pays', 'timezones'));
+        // Vérifier si l'utilisateur est connecté
+        if (!Auth::check()) {
+            // Stocker l'ID du voyage dans la session pour rediriger après connexion
+            session(['intended_voyage_id' => $voyage->id]);
+            
+            return redirect()->route('login')
+                             ->with('info', 'Veuillez vous connecter ou créer un compte pour réserver ce voyage.');
+        }
+        
+        return view('page.reservation-create', compact('voyage'));
     }
-
+    
     /**
-     * Store a newly created destination in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * Enregistre une nouvelle réservation
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'ville' => 'required|string|max:255',
-            'pays' => 'required|string|max:255',
-            'code_aeroport' => 'required|string|max:5|unique:destinations,code_aeroport',
-            'description' => 'nullable|string',
-            'attractions' => 'nullable|string',
-            'statut' => 'required|in:actif,inactif',
-            'image_url' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        // Vérifier si l'utilisateur est connecté
+        if (!Auth::check()) {
+            return redirect()->route('login')
+                             ->with('info', 'Veuillez vous connecter ou créer un compte pour réserver un voyage.');
+        }
+        
+        // Valider les données
+        $request->validate([
+            'voyage_id' => 'required|exists:voyages,id',
+            'nombre_places' => 'required|integer|min:1',
+            'conditions' => 'required|accepted',
         ]);
-
-        if ($request->hasFile('image_url')) {
-            $validated['image_url'] = $request->file('image_url')->store('destinations', 'public');
+        
+        // Récupérer le voyage
+        $voyage = Voyage::findOrFail($request->voyage_id);
+        
+        // Vérifier si le voyage est toujours disponible
+        if ($voyage->statut !== 'active') {
+            return back()->with('error', 'Ce voyage n\'est plus disponible à la réservation.');
         }
-
-        Destination::create($validated);
-
-        return redirect()->route('manager.destinations.index')->with('success', 'Destination créée avec succès.');
-    }
-
-    /**
-     * Show the form for editing the specified destination.
-     *
-     * @param  \App\Models\Destination  $destination
-     * @return \Illuminate\View\View
-     */
-    public function edit(Destination $destination)
-    {
-        $pays = $this->getPaysList(); // Liste des pays pour le formulaire
-        $timezones = $this->getTimezonesList(); // Liste des fuseaux horaires
-        return view('administration.gestionnaire.destinations.edit', compact('destination', 'pays', 'timezones'));
-    }
-
-    /**
-     * Update the specified destination in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Destination  $destination
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(Request $request, Destination $destination)
-    {
-        $validated = $request->validate([
-            'ville' => 'required|string|max:255',
-            'pays' => 'required|string|max:255',
-            'code_aeroport' => 'required|string|max:5|unique:destinations,code_aeroport,' . $destination->id,
-            'description' => 'nullable|string',
-            'attractions' => 'nullable|string',
-            'statut' => 'required|in:actif,inactif',
-            'image_url' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
-
-        if ($request->hasFile('image_url')) {
-            // Supprimer l'ancienne image si elle existe
-            if ($destination->image_url) {
-                \Storage::disk('public')->delete($destination->image_url);
-            }
-            $validated['image_url'] = $request->file('image_url')->store('destinations', 'public');
+        
+        // Vérifier si la date de départ n'est pas dépassée
+        if (Carbon::parse($voyage->date_depart)->isPast()) {
+            return back()->with('error', 'La date de départ de ce voyage est déjà passée.');
         }
-
-        $destination->update($validated);
-
-        return redirect()->route('manager.destinations.index')->with('success', 'Destination mise à jour avec succès.');
-    }
-
-    /**
-     * Remove the specified destination from storage.
-     *
-     * @param  \App\Models\Destination  $destination
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function destroy(Destination $destination)
-    {
-        if ($destination->image_url) {
-            \Storage::disk('public')->delete($destination->image_url);
+        
+        // Vérifier la disponibilité des places
+        if ($voyage->nbre_place < $request->nombre_places) {
+            return back()->with('error', 'Le nombre de places demandées n\'est plus disponible. Il reste ' . $voyage->nbre_place . ' place(s).');
         }
-
-        $destination->delete();
-
-        return redirect()->route('manager.destinations.index')->with('success', 'Destination supprimée avec succès.');
+        
+        // Récupérer l'utilisateur connecté
+        $user = Auth::user();
+        
+        // Créer la réservation
+        $reservation = new Reservation();
+        $reservation->voyage_id = $request->voyage_id;
+        $reservation->user_id = $user->id;
+        $reservation->nom = $user->name;
+        $reservation->email = $user->email;
+        $reservation->telephone = $user->telephone;
+        $reservation->nombre_places = $request->nombre_places;
+        $reservation->montant_total = $voyage->montant * $request->nombre_places;
+        $reservation->statut = 'en_attente';
+        $reservation->save();
+        
+        // Mettre à jour le nombre de places disponibles
+        $voyage->nbre_place -= $request->nombre_places;
+        
+        // Si le nombre de places atteint 0, mettre à jour le statut du voyage à inactive
+        if ($voyage->nbre_place <= 0) {
+            $voyage->statut = 'inactive';
+        }
+        
+        // Sauvegarder les modifications du voyage
+        $voyage->save();
+        
+        return redirect()->route('reservation.confirmation', $reservation->id)
+                         ->with('success', 'Votre réservation a été enregistrée avec succès.');
     }
-
+    
     /**
-     * Get the list of countries for the form.
-     *
-     * @return array
+     * Affiche la page de confirmation de réservation
      */
-    private function getPaysList()
+    public function confirmation($id)
     {
-        return [
-            'FR' => 'France',
-            'US' => 'États-Unis',
-            'CM' => 'Cameroun',
-            'DE' => 'Allemagne',
-            'JP' => 'Japon',
-            // Ajoutez d'autres pays ici
-        ];
+        $reservation = Reservation::findOrFail($id);
+        
+        // Vérifier si l'utilisateur a le droit de voir cette réservation
+        if (Auth::id() !== $reservation->user_id && !Auth::user()->isAdmin() && !Auth::user()->isPartner()) {
+            abort(403, 'Vous n\'êtes pas autorisé à voir cette réservation.');
+        }
+        
+        return view('page.reservation-confirmation', compact('reservation'));
     }
-
+    
     /**
-     * Get the list of timezones for the form.
-     *
-     * @return array
+     * Annule une réservation
      */
-    private function getTimezonesList()
+    public function cancel(Request $request, $id)
     {
-        return [
-            'UTC' => 'UTC',
-            'Europe/Paris' => 'Europe/Paris',
-            'America/New_York' => 'America/New_York',
-            'Africa/Douala' => 'Africa/Douala',
-            'Asia/Tokyo' => 'Asia/Tokyo',
-            // Ajoutez d'autres fuseaux horaires ici
-        ];
+        $reservation = Reservation::findOrFail($id);
+        
+        // Vérifier si l'utilisateur a le droit d'annuler cette réservation
+        if (Auth::id() !== $reservation->user_id && !Auth::user()->isAdmin() && !Auth::user()->isPartner()) {
+            abort(403, 'Vous n\'êtes pas autorisé à annuler cette réservation.');
+        }
+        
+        // Vérifier si la réservation peut être annulée (pas déjà annulée et pas déjà passée)
+        if ($reservation->statut === 'annulee') {
+            return back()->with('error', 'Cette réservation a déjà été annulée.');
+        }
+        
+        // Vérifier si la date de départ n'est pas dépassée
+        if (Carbon::parse($reservation->voyage->date_depart)->isPast()) {
+            return back()->with('error', 'Vous ne pouvez pas annuler une réservation pour un voyage déjà passé.');
+        }
+        
+        // Mettre à jour le statut de la réservation
+        $reservation->statut = 'annulee';
+        $reservation->save();
+        
+        // Remettre à jour le nombre de places disponibles
+        $voyage = $reservation->voyage;
+        $voyage->nbre_place += $reservation->nombre_places;
+        
+        // Si le voyage était inactif (complet), le remettre en actif
+        if ($voyage->statut === 'inactive') {
+            $voyage->statut = 'active';
+        }
+        
+        $voyage->save();
+        
+        return back()->with('success', 'Votre réservation a été annulée avec succès.');
+    }
+    
+    /**
+     * Affiche les détails d'une réservation
+     */
+    public function show(Reservation $reservation)
+    {
+        // Vérifier si l'utilisateur a le droit de voir cette réservation
+        if (Auth::id() !== $reservation->user_id && !Auth::user()->isAdmin() && !Auth::user()->isPartner()) {
+            abort(403, 'Vous n\'êtes pas autorisé à voir cette réservation.');
+        }
+        
+        return view('page.reservation-details', compact('reservation'));
     }
 }

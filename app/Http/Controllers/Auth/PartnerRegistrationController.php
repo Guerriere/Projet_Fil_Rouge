@@ -29,9 +29,7 @@ class PartnerRegistrationController extends Controller
      * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse
-    { 
-        
-
+    {
         try {
             $validated = $request->validate([
                 'name' => ['required', 'string', 'max:255'],
@@ -43,15 +41,16 @@ class PartnerRegistrationController extends Controller
                 'phone_pro' => ['required', 'string', 'max:15'],
                 'agency_name' => ['required', 'string', 'max:255'],
                 'agency_type' => ['required', 'in:Bus,Train,Avion'],
-                'accept_conditions' => ['required', 'accepted'],  
-                      ]);
+                'agency_photo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+                'agency_logo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+                'accept_conditions' => ['required', 'accepted'],
+            ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             dd($e->errors());
         }
 
         // Convertir accept_conditions en booléen
         $validated['accept_conditions'] = isset($validated['accept_conditions']) && $validated['accept_conditions'] === 'on';
-
 
         // Étape 1 : Enregistrement dans la table users
         $user = User::create([
@@ -63,13 +62,19 @@ class PartnerRegistrationController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        // Étape 2 : Enregistrement dans la table agences
+        // Étape 2 : Gestion des fichiers téléchargés
+        $agencyPhotoPath = $request->file('agency_photo')->store('agencies/photos', 'public');
+        $agencyLogoPath = $request->file('agency_logo')->store('agencies/logos', 'public');
+
+        // Étape 3 : Enregistrement dans la table agences
         Agence::create([
             'user_id' => $user->id,
             'email_pro' => $validated['email_pro'],
             'phone_pro' => $validated['phone_pro'],
             'agency_name' => $validated['agency_name'],
             'agency_type' => $validated['agency_type'],
+            'agency_photo' => $agencyPhotoPath, // Enregistrement du chemin de la photo
+            'agency_logo' => $agencyLogoPath,   // Enregistrement du chemin du logo
             'accept_conditions' => $validated['accept_conditions'],
         ]);
 
