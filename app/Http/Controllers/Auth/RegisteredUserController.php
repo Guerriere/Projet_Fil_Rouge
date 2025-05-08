@@ -17,7 +17,7 @@ class RegisteredUserController extends Controller
     /**
      * Display the registration view.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
         return view('auth.register');
     }
@@ -28,23 +28,37 @@ class RegisteredUserController extends Controller
      * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+{
+    $request->validate([
+        'name' => ['required', 'string', 'max:255'],
+        'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+        'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        'telephone' => ['required', 'string', 'max:20'],
+        'adresse' => ['required', 'string', 'max:255'],
+    ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        'telephone' => $request->telephone,
+        'adresse' => $request->adresse,
+        'role' => 'client', // Par défaut, tous les nouveaux utilisateurs sont des clients
+    ]);
 
-        event(new Registered($user));
+    event(new Registered($user));
 
-        Auth::login($user);
+    Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+    // Vérifier s'il y a un voyage en attente de réservation
+    if ($request->has('intended_voyage_id')) {
+        $voyageId = $request->input('intended_voyage_id');
+        return redirect()->route('client.reservations.add', ['voyage_id' => $voyageId])
+                         ->with('success', 'Votre compte a été créé avec succès. Vous pouvez maintenant réserver votre voyage.');
     }
+
+    // Redirection par défaut vers le tableau de bord client
+    return redirect()->route('client.dashboard');
+}
+
 }

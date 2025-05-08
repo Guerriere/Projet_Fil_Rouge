@@ -23,14 +23,22 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                // Ajout de journalisation pour déboguer
-                \Log::info('User already authenticated in RedirectIfAuthenticated', [
-                    'user_id' => Auth::id(),
-                    'role' => Auth::user()->role ?? 'unknown'
-                ]);
+                // Si l'utilisateur est déjà authentifié et qu'il y a un intended_voyage_id
+                if ($request->has('intended_voyage_id')) {
+                    $voyageId = $request->input('intended_voyage_id');
+                    return redirect()->route('client.reservations.add', ['voyage_id' => $voyageId])
+                                    ->with('success', 'Vous êtes déjà connecté. Vous pouvez réserver votre voyage.');
+                }
                 
-                // Utiliser un chemin absolu pour éviter les problèmes de nommage de route
-                return redirect('/');
+                // Redirection par défaut selon le rôle
+                $user = Auth::user();
+                if ($user->role === 'admin') {
+                    return redirect()->route('admin.dashboard');
+                } elseif ($user->role === 'partenaire') {
+                    return redirect()->route('partner.dashboard');
+                } else {
+                    return redirect()->route('client.dashboard');
+                }
             }
         }
 

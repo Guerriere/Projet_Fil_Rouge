@@ -11,21 +11,29 @@ use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\HomeController;
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\VoyageController;
 
+// Routes pour les réservations sans authentification
+Route::get('/reservation/create', [ReservationController::class, 'create'])->name('reservation.create');
+Route::post('/reservation/store-guest', [ReservationController::class, 'storeGuest'])->name('reservation.store.guest');
+Route::get('/reservation/confirmation-guest/{id}', [ReservationController::class, 'confirmationGuest'])->name('reservation.confirmation.guest');
+
 // Redirection après connexion
 Route::get('/dashboard', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 Route::get('/home', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('home');
+
 // Routes pour l'administrateur
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/partners/add', [AdminController::class, 'addPartner'])->name('partners.add');
     Route::get('/partners/list', [AdminController::class, 'listPartners'])->name('partners.list');
 });
+
 // Routes pour les clients
-Route::middleware(['auth', \App\Http\Middleware\EnsureUserIsClient::class])->group(function () {
+Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/client/dashboard', [ClientController::class, 'dashboard'])->name('client.dashboard');
     
@@ -36,14 +44,20 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureUserIsClient::class])->gro
     
     // Réservations
     Route::get('/client/reservations', [ClientController::class, 'listReservations'])->name('client.reservations.list');
-    Route::get('/client/reservations/add', [ClientController::class, 'addReservation'])->name('client.reservations.add');
+    // Route pour afficher le formulaire de réservation
+    Route::get('/client/reservations/add', [App\Http\Controllers\ClientController::class, 'addReservation'])
+        ->name('client.reservations.add');
+
+    // Route pour traiter la réservation
+    Route::post('/reservation/store', [App\Http\Controllers\ReservationController::class, 'store'])
+        ->name('reservation.store');
     Route::get('/client/reservations/{id}', [ClientController::class, 'showReservation'])->name('client.reservations.show');
     Route::put('/client/reservations/{id}/cancel', [ClientController::class, 'cancelReservation'])->name('client.reservations.cancel');
     Route::get('/client/reservations/{id}/confirmation', [ClientController::class, 'confirmationReservation'])->name('client.reservations.confirmation');
 });
 
 // Routes pour le partenaire
-Route::middleware(['auth',])->prefix('partner')->name('partner.')->group(function () {
+Route::middleware(['auth'])->prefix('partner')->name('partner.')->group(function () {
     Route::get('/dashboard', [PartnerController::class, 'dashboard'])->name('dashboard');
     Route::get('/offers/add', [PartnerController::class, 'addOffer'])->name('offers.add');
     Route::get('/offers/list', [PartnerController::class, 'listOffers'])->name('offers.list');
@@ -70,11 +84,7 @@ Route::middleware(['auth',])->prefix('partner')->name('partner.')->group(functio
     Route::get('/offers/edit/{id}', [VoyageController::class, 'edit'])->name('offers.edit');
     Route::put('/offers/update/{id}', [VoyageController::class, 'update'])->name('offers.update');
     Route::delete('/offers/delete/{id}', [VoyageController::class, 'destroy'])->name('offers.delete');
-
-
 });
-
-
 
 // Routes pour le profil utilisateur
 Route::middleware('auth')->group(function () {
@@ -89,17 +99,15 @@ Route::middleware('auth')->group(function () {
     Route::put('/partner/update', [PartnerController::class, 'update'])->name('partner.update');
     Route::get('/partner/profile', [PartnerController::class, 'show'])->name('partner.show');
     Route::delete('/partner/delete', [PartnerController::class, 'destroy'])->name('partner.destroy');
-
 });
 
 // Routes pour les réservations
-Route::middleware(['auth'])->group(function () {
-    Route::get('/mes-reservations', [App\Http\Controllers\ReservationController::class, 'index'])->name('reservation.index');
-    Route::get('/reservation/{reservation}', [App\Http\Controllers\ReservationController::class, 'show'])->name('reservation.show');
-    Route::post('/reservation', [App\Http\Controllers\ReservationController::class, 'store'])->name('reservation.store');
-    Route::put('/reservation/{reservation}/cancel', [App\Http\Controllers\ReservationController::class, 'cancel'])->name('reservation.cancel');
-    Route::get('/reservation/{reservation}/confirmation', [App\Http\Controllers\ReservationController::class, 'confirmation'])->name('reservation.confirmation');
-});
+//Route::middleware(['auth'])->group(function () {
+   // Route::get('/mes-reservations', [App\Http\Controllers\ReservationController::class, 'index'])->name('reservation.index');
+   // Route::get('/reservation/{reservation}', [App\Http\Controllers\ReservationController::class, 'show'])->name('reservation.show');
+   // Route::put('/reservation/{reservation}/cancel', [App\Http\Controllers\ReservationController::class, 'cancel'])->name('reservation.cancel');
+   // Route::get('/reservation/{reservation}/confirmation', [App\Http\Controllers\ReservationController::class, 'confirmation'])->name('reservation.confirmation');
+//});
 
 // Pages accessibles sans authentification
 Route::get('/', [PageController::class, 'accueil'])->name('accueil');
@@ -113,6 +121,6 @@ Route::get('error', [PageController::class, 'error'])->name('error');
 Route::get('/agence', [App\Http\Controllers\AgenceController::class, 'index'])->name('agence.index');
 Route::get('/agence/{id}', [App\Http\Controllers\AgenceController::class, 'show'])->name('agence.show');
 // Route pour afficher un voyage spécifique après connexion
-Route::get('/agence/voyage/{voyage}', [App\Http\Controllers\AgenceController::class, 'showVoyage'])->name('agence.show.voyage');
+//Route::get('/agence/voyage/{voyage}', [App\Http\Controllers\AgenceController::class, 'showVoyage'])->name('agence.show.voyage');
 
 require __DIR__.'/auth.php';

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Reservation;
 use App\Models\Voyage;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class ClientController extends Controller
 {
@@ -49,10 +50,28 @@ class ClientController extends Controller
     /**
      * Affiche le formulaire d'ajout de réservation.
      */
-    public function addReservation()
-    {
-        return view('Dashboard.client.reservations.add');
+    public function addReservation(Request $request)
+{
+    $voyageId = $request->input('voyage_id');
+    
+    if (!$voyageId) {
+        return redirect()->route('client.dashboard')->with('error', 'Aucun voyage sélectionné.');
     }
+    
+    $voyage = Voyage::findOrFail($voyageId);
+    
+    
+    // Vérifier si le voyage est disponible
+    if ($voyage->nbre_place <= 0 || $voyage->statut !== 'active') {
+        return redirect()->route('agence.show', $voyage->agence_id)->with('error', 'Ce voyage n\'est plus disponible.');
+    }
+    
+    // Assurez-vous que la vue existe et est correctement configurée
+    return view('Dashboard.client.reservation-add', compact('voyage'));
+}
+
+    
+
 
     /**
      * Affiche la liste des réservations du client.

@@ -63,7 +63,13 @@
         <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Créer un compte</h2>
         <form method="POST" action="{{ route('register') }}" class="space-y-6">
             @csrf
-            <!-- Name and Email -->
+            <!-- Dans le formulaire d'inscription -->
+                <!-- Ajouter ceci dans le formulaire d'inscription -->
+                @if(request()->has('intended_voyage_id'))
+                <input type="hidden" name="intended_voyage_id" value="{{ request()->input('intended_voyage_id') }}">
+                @endif
+
+                <!-- Name and Email -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700">Nom</label>

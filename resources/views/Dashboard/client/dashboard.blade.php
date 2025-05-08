@@ -113,7 +113,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <a href="{{ route('client.reservations.add') }}" class="btn btn-outline-primary w-100 py-3">
+                            <a href="{{ route('agence.index') }}" class="btn btn-outline-primary w-100 py-3">
                                 <i class="fas fa-plus-circle me-2"></i> Nouvelle réservation
                             </a>
                         </div>

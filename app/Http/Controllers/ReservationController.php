@@ -10,13 +10,8 @@ use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
-    /**
-     * Constructeur - Applique le middleware auth aux méthodes spécifiées
-     */
-    public function __construct()
-    {
-        $this->middleware('auth')->only(['store', 'index', 'show', 'cancel']);
-    }
+    
+
     
     /**
      * Affiche la liste des réservations de l'utilisateur connecté
@@ -31,97 +26,87 @@ class ReservationController extends Controller
     }
     
     /**
-     * Affiche le formulaire de réservation
+     * Affiche le formulaire de réservation pour les utilisateurs non authentifiés
      */
-    public function create(Voyage $voyage)
+    public function create(Request $request)
     {
-        // Vérifier si l'utilisateur est connecté
-        if (!Auth::check()) {
-            // Stocker l'ID du voyage dans la session pour rediriger après connexion
-            session(['intended_voyage_id' => $voyage->id]);
-            
-            return redirect()->route('login')
-                             ->with('info', 'Veuillez vous connecter ou créer un compte pour réserver ce voyage.');
+        $voyageId = $request->input('voyage_id');
+        
+        if (!$voyageId) {
+            return redirect()->route('accueil')->with('error', 'Aucun voyage sélectionné.');
+        }
+        
+        $voyage = Voyage::findOrFail($voyageId);
+        
+        // Vérifier si le voyage est disponible
+        if ($voyage->nbre_place <= 0 || $voyage->statut !== 'active') {
+            return redirect()->route('agence.show', $voyage->agence_id)->with('error', 'Ce voyage n\'est plus disponible.');
         }
         
         return view('page.reservation-create', compact('voyage'));
     }
     
-    /**
-     * Enregistre une nouvelle réservation
-     */
-    public function store(Request $request)
-    {
-        // Vérifier si l'utilisateur est connecté
-        if (!Auth::check()) {
-            return redirect()->route('login')
-                             ->with('info', 'Veuillez vous connecter ou créer un compte pour réserver un voyage.');
-        }
-        
-        // Valider les données
-        $request->validate([
-            'voyage_id' => 'required|exists:voyages,id',
-            'nombre_places' => 'required|integer|min:1',
-            'conditions' => 'required|accepted',
-        ]);
-        
-        // Récupérer le voyage
-        $voyage = Voyage::findOrFail($request->voyage_id);
-        
-        // Vérifier si le voyage est toujours disponible
-        if ($voyage->statut !== 'active') {
-            return back()->with('error', 'Ce voyage n\'est plus disponible à la réservation.');
-        }
-        
-        // Vérifier si la date de départ n'est pas dépassée
-        if (Carbon::parse($voyage->date_depart)->isPast()) {
-            return back()->with('error', 'La date de départ de ce voyage est déjà passée.');
-        }
-        
-        // Vérifier la disponibilité des places
-        if ($voyage->nbre_place < $request->nombre_places) {
-            return back()->with('error', 'Le nombre de places demandées n\'est plus disponible. Il reste ' . $voyage->nbre_place . ' place(s).');
-        }
-        
-        // Récupérer l'utilisateur connecté
-        $user = Auth::user();
-        
-        // Créer la réservation
-        $reservation = new Reservation();
-        $reservation->voyage_id = $request->voyage_id;
-        $reservation->user_id = $user->id;
-        $reservation->nom = $user->name;
-        $reservation->email = $user->email;
-        $reservation->telephone = $user->telephone;
-        $reservation->nombre_places = $request->nombre_places;
-        $reservation->montant_total = $voyage->montant * $request->nombre_places;
-        $reservation->statut = 'en_attente';
-        $reservation->save();
-        
-        // Mettre à jour le nombre de places disponibles
-        $voyage->nbre_place -= $request->nombre_places;
-        
-        // Si le nombre de places atteint 0, mettre à jour le statut du voyage à inactive
-        if ($voyage->nbre_place <= 0) {
-            $voyage->statut = 'inactive';
-        }
-        
-        // Sauvegarder les modifications du voyage
-        $voyage->save();
-        
-        return redirect()->route('reservation.confirmation', $reservation->id)
-                         ->with('success', 'Votre réservation a été enregistrée avec succès.');
-    }
     
     /**
-     * Affiche la page de confirmation de réservation
+     * Enregistre une nouvelle réservation pour un utilisateur authentifié
+     */
+    public function store(Request $request)
+{
+    // Validation des données
+    $request->validate([
+        'voyage_id' => 'required|exists:voyages,id',
+        'nombre_places' => 'required|integer|min:1',
+        'conditions' => 'required|accepted',
+    ]);
+
+    // Récupérer le voyage
+    $voyage = Voyage::findOrFail($request->voyage_id);
+    
+    // Vérifier la disponibilité
+    if ($voyage->nbre_place < $request->nombre_places) {
+        return back()->with('error', 'Le nombre de places demandées n\'est pas disponible.');
+    }
+    
+    // Récupérer l'utilisateur connecté
+    $user = Auth::user();
+    
+    // Créer la réservation
+    $reservation = new Reservation();
+    $reservation->user_id = $user->id;
+    $reservation->voyage_id = $voyage->id;
+    $reservation->nombre_places = $request->nombre_places;
+    $reservation->montant_total = $voyage->montant * $request->nombre_places;
+    $reservation->statut = 'en_attente';
+    $reservation->nom = $user->name;
+    $reservation->email = $user->email;
+    $reservation->telephone = $user->telephone;
+    $reservation->save();
+    
+    // Mettre à jour le nombre de places disponibles
+    $voyage->nbre_place -= $request->nombre_places;
+    
+    // Si le nombre de places atteint 0, mettre à jour le statut du voyage à "inactif"
+    if ($voyage->nbre_place <= 0) {
+        $voyage->statut = 'inactive';
+    }
+    
+    $voyage->save();
+    
+    return redirect()->route('client.reservations.show', $reservation->id)
+                 ->with('success', 'Votre réservation a été effectuée avec succès.');
+}
+
+    
+    
+    /**
+     * Affiche la page de confirmation de réservation pour les utilisateurs authentifiés
      */
     public function confirmation($id)
     {
         $reservation = Reservation::findOrFail($id);
         
         // Vérifier si l'utilisateur a le droit de voir cette réservation
-        if (Auth::id() !== $reservation->user_id && !Auth::user()->isAdmin() && !Auth::user()->isPartner()) {
+        if (Auth::id() !== $reservation->user_id && !Auth::user()->isAdmin() && !(Auth::user()->role === 'partenaire')) {
             abort(403, 'Vous n\'êtes pas autorisé à voir cette réservation.');
         }
         
@@ -136,7 +121,7 @@ class ReservationController extends Controller
         $reservation = Reservation::findOrFail($id);
         
         // Vérifier si l'utilisateur a le droit d'annuler cette réservation
-        if (Auth::id() !== $reservation->user_id && !Auth::user()->isAdmin() && !Auth::user()->isPartner()) {
+        if (Auth::id() !== $reservation->user_id && !Auth::user()->isAdmin() && !(Auth::user()->role === 'partenaire')) {
             abort(403, 'Vous n\'êtes pas autorisé à annuler cette réservation.');
         }
         
@@ -174,7 +159,7 @@ class ReservationController extends Controller
     public function show(Reservation $reservation)
     {
         // Vérifier si l'utilisateur a le droit de voir cette réservation
-        if (Auth::id() !== $reservation->user_id && !Auth::user()->isAdmin() && !Auth::user()->isPartner()) {
+        if (Auth::id() !== $reservation->user_id && !Auth::user()->isAdmin() && !(Auth::user()->role === 'partenaire')) {
             abort(403, 'Vous n\'êtes pas autorisé à voir cette réservation.');
         }
         

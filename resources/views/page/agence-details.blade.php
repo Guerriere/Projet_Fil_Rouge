@@ -247,100 +247,22 @@
                                 <i class="fas fa-users text-primary me-2"></i> {{ $voyage->nbre_place }} places disponibles
                             </p>
                             
+                            <!-- Bouton de réservation pour tous les utilisateurs -->
                             @if(Auth::check())
-                                <!-- Bouton de réservation -->
-                                <button type="button" class="btn btn-primary w-100" onclick="openModal{{ $voyage->id }}()">
+                                <!-- Bouton de réservation qui redirige vers la page de réservation -->
+                                <a href="{{ route('client.reservations.add', ['voyage_id' => $voyage->id]) }}" class="btn btn-primary w-100">
                                     Réserver
-                                </button>
+                                </a>
                             @else
-                                <!-- Bouton de connexion -->
-                                <a href="{{ route('login') }}" class="btn btn-primary w-100" onclick="storeVoyageInSession({{ $voyage->id }})">
+                                <!-- Bouton de connexion avec redirection vers la page de réservation après authentification -->
+                                <a href="{{ route('login', ['intended_voyage_id' => $voyage->id]) }}" class="btn btn-primary w-100">
                                     Se connecter pour réserver
                                 </a>
                             @endif
+
                         </div>
                     </div>
                 </div>
-                
-                <!-- Modal personnalisée pour ce voyage (seulement si l'utilisateur est connecté) -->
-                @if(Auth::check())
-                <div id="customModal{{ $voyage->id }}" class="custom-modal">
-                    <div class="custom-modal-dialog">
-                        <div class="custom-modal-header">
-                            <h5 class="custom-modal-title">Réserver votre voyage</h5>
-                            <button type="button" class="custom-modal-close" onclick="closeModal{{ $voyage->id }}()">&times;</button>
-                        </div>
-                        <div class="custom-modal-body">
-                            <div class="reservation-details mb-4">
-                                <h6 class="fw-bold">Détails du voyage</h6>
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <p class="mb-1"><strong>Trajet:</strong> {{ $voyage->destinationDepart->ville }} → {{ $voyage->destinationArrive->ville }}</p>
-                                        <p class="mb-1"><strong>Date:</strong> {{ \Carbon\Carbon::parse($voyage->date_depart)->format('d/m/Y') }}</p>
-                                        <p class="mb-1"><strong>Heure:</strong> {{ $voyage->heure_depart }}</p>
-                                        <p class="mb-1"><strong>Prix:</strong> {{ number_format($voyage->montant, 0, ',', ' ') }} FCFA</p>
-                                        <p class="mb-0"><strong>Places disponibles:</strong> {{ $voyage->nbre_place }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <form action="{{ route('reservation.store') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="voyage_id" value="{{ $voyage->id }}">
-                                
-                                <div class="mb-3">
-                                    <label for="nombre_places{{ $voyage->id }}" class="form-label">Nombre de places</label>
-                                    <input type="number" class="form-control" id="nombre_places{{ $voyage->id }}" name="nombre_places" min="1" max="{{ $voyage->nbre_place }}" value="1" required onchange="updateTotal{{ $voyage->id }}()">
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="prix_total{{ $voyage->id }}" class="form-label">Prix total</label>
-                                    <div class="form-control bg-light" id="prix_total{{ $voyage->id }}">{{ number_format($voyage->montant, 0, ',', ' ') }} FCFA</div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <p><strong>Réservation au nom de:</strong> {{ Auth::user()->name }}</p>
-                                    <p><strong>Email:</strong> {{ Auth::user()->email }}</p>
-                                    <p><strong>Téléphone:</strong> {{ Auth::user()->telephone }}</p>
-                                </div>
-                                
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="conditions{{ $voyage->id }}" name="conditions" required>
-                                    <label class="form-check-label" for="conditions{{ $voyage->id }}">
-                                        J'accepte les conditions générales de vente
-                                    </label>
-                                </div>
-                                
-                                <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary">Confirmer la réservation</button>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="custom-modal-footer">
-                            <button type="button" class="btn btn-secondary" onclick="closeModal{{ $voyage->id }}()">Fermer</button>
-                        </div>
-                    </div>
-                </div>
-                @endif
-                
-                <script>
-                    function openModal{{ $voyage->id }}() {
-                        document.getElementById('customModal{{ $voyage->id }}').style.display = 'block';
-                        document.body.classList.add('modal-open');
-                    }
-                    
-                    function closeModal{{ $voyage->id }}() {
-                        document.getElementById('customModal{{ $voyage->id }}').style.display = 'none';
-                        document.body.classList.remove('modal-open');
-                    }
-                    
-                    function updateTotal{{ $voyage->id }}() {
-                        const nombrePlaces = document.getElementById('nombre_places{{ $voyage->id }}').value;
-                        const prixUnitaire = {{ $voyage->montant }};
-                        const total = nombrePlaces * prixUnitaire;
-                        document.getElementById('prix_total{{ $voyage->id }}').textContent = total.toLocaleString('fr-FR') + ' FCFA';
-                    }
-                </script>
             @empty
                 <div class="col-12 text-center py-5">
                     <div class="alert alert-info">
@@ -357,8 +279,7 @@
                         @endif
                     </div>
                 </div>
-            @endforelse
-        </div>
+            @endforelse        </div>
     </div>
 
     <!-- Section des informations supplémentaires -->
@@ -397,61 +318,6 @@
 
     @include('includes.script')
 
-    <script>
-        // Fermer les modals si l'utilisateur clique en dehors
-        document.addEventListener('click', function(event) {
-            const modals = document.querySelectorAll('.custom-modal');
-            
-            modals.forEach(modal => {
-                const modalDialog = modal.querySelector('.custom-modal-dialog');
-                
-                if (modal.style.display === 'block' && !modalDialog.contains(event.target) && !event.target.closest('button[onclick^="openModal"]')) {
-                    // Trouver l'ID du modal
-                    const modalId = modal.id;
-                    const voyageId = modalId.replace('customModal', '');
-                    
-                    // Appeler la fonction de fermeture correspondante
-                    window['closeModal' + voyageId]();
-                }
-            });
-        });
-        
-        // Empêcher la propagation des clics à l'intérieur des modals
-        document.addEventListener('DOMContentLoaded', function() {
-            const modalDialogs = document.querySelectorAll('.custom-modal-dialog');
-            
-            modalDialogs.forEach(dialog => {
-                dialog.addEventListener('click', function(event) {
-                    event.stopPropagation();
-                });
-            });
-        });
-        
-        // Fermer les modals avec la touche Escape
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                const openModals = document.querySelectorAll('.custom-modal[style*="display: block"]');
-                
-                openModals.forEach(modal => {
-                    // Trouver l'ID du modal
-                    const modalId = modal.id;
-                    const voyageId = modalId.replace('customModal', '');
-                    
-                    // Appeler la fonction de fermeture correspondante
-                    window['closeModal' + voyageId]();
-                });
-            }
-        });
-    </script>
-    <script>
-        // Fonction pour stocker l'ID du voyage et rediriger vers la page de connexion
-        function storeVoyageInSession(voyageId) {
-            // Ajouter l'ID du voyage comme paramètre d'URL pour la redirection
-            const loginUrl = new URL("{{ route('login') }}");
-            loginUrl.searchParams.append('intended_voyage_id', voyageId);
-            window.location.href = loginUrl.toString();
-        }
-    </script>
-</body>
+    </body>
 
 </html>
