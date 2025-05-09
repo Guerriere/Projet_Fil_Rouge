@@ -35,7 +35,7 @@
             <h5 class="card-title mb-0">Informations de l'utilisateur</h5>
         </div>
         <div class="card-body">
-            <form action="{{ route('admin.users.store') }}" method="POST" enctype="multipart/form-data">
+            <form method="POST" action="{{ route('admin.users.store') }}"  enctype="multipart/form-data">
                 @csrf
                 
                 <div class="row">

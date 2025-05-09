@@ -1,28 +1,30 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
     /**
-     * Handle redirection after login based on user role.
+     * Create a new controller instance.
      *
-     * @return \Illuminate\Http\RedirectResponse
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
      */
     public function index()
     {
-        
-        $user = Auth::user();
-        if ($user->role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        } elseif ($user->role === 'partenaire') {
-            return redirect()->route('partner.dashboard');
-        } elseif ($user->role === 'client') {
-            return redirect()->route('dashboard');
-        }
-
-        // Default redirection for other roles or guests
-        return redirect()->route('accueil');
+        return view('home');
     }
 }
+
+

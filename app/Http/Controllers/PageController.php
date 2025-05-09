@@ -34,10 +34,7 @@ class PageController extends Controller
         return view('page.services');
     }
     
-    public function booking()
-    {
-        return view('page.booking');
-    }
+    
     public function faq()
     {
         return view('page.faq');

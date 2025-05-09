@@ -5,6 +5,13 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\Auth\PartnerRegistrationController;
+use App\Http\Controllers\AgenceController;
+use App\Http\Controllers\DestinationController;
+use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,11 +24,57 @@ use App\Http\Controllers\ClientController;
 |
 */
 
-// Routes publiques
-Route::get('/', [HomeController::class, 'index'])->name('home');
+// Routes publiques pour PageController
+Route::get('/', [PageController::class, 'Accueil'])->name('accueil');
+Route::get('/about', [PageController::class, 'about'])->name('about');
+Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+Route::get('/services', [PageController::class, 'services'])->name('services');
+Route::get('/faq', [PageController::class, 'faq'])->name('faq');
+Route::get('/terms', [PageController::class, 'terms'])->name('terms');
+Route::get('/privacy', [PageController::class, 'privacy'])->name('privacy');
+Route::get('/error', [PageController::class, 'error'])->name('error');
+
+// Routes pour AgenceController
+Route::get('/agence', [AgenceController::class, 'index'])->name('agence.index');
+Route::get('/agences/{id}', [AgenceController::class, 'show'])->name('agence.show');
+Route::get('/voyages/{voyage}', [AgenceController::class, 'showVoyage'])->name('voyage.show');
+
+// Routes pour ReservationController (publiques et authentifiées)
+Route::get('/reservation/create', [ReservationController::class, 'create'])->name('reservation.create');
+Route::middleware(['auth'])->group(function () {
+    Route::post('/reservation/store', [ReservationController::class, 'store'])->name('reservation.store');
+    Route::get('/reservation/{id}/confirmation', [ReservationController::class, 'confirmation'])->name('reservation.confirmation');
+    Route::post('/reservation/{id}/cancel', [ReservationController::class, 'cancel'])->name('reservation.cancel');
+    Route::get('/reservation/{reservation}', [ReservationController::class, 'show'])->name('reservation.show');
+    Route::get('/mes-reservations', [ReservationController::class, 'index'])->name('reservation.index');
+});
+
+// Routes pour ProfileController
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
 // Routes d'authentification
 Auth::routes();
+
+// Routes d'inscription partenaire
+Route::get('/register/partner', [PartnerRegistrationController::class, 'create'])->name('register.partner');
+Route::post('/register/partner', [PartnerRegistrationController::class, 'store'])->name('register.partner.store');
+
+// Route de redirection vers le tableau de bord approprié selon le rôle
+Route::get('/dashboard', function () {
+    if (Auth::user()->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    } elseif (Auth::user()->role === 'partenaire') {
+        return redirect()->route('partner.dashboard');
+    } elseif (Auth::user()->role === 'client') {
+        return redirect()->route('client.dashboard');
+    } else {
+        return redirect()->route('home');
+    }
+})->middleware(['auth'])->name('dashboard');
 
 // Routes pour l'administrateur
 Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
@@ -30,7 +83,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     // Gestion des utilisateurs
     Route::get('/users', [AdminController::class, 'usersList'])->name('admin.users.list');
     Route::get('/users/create', [AdminController::class, 'userCreate'])->name('admin.users.create');
-    Route::post('/users', [AdminController::class, 'userStore'])->name('admin.users.store');
+    Route::post('/users/store', [AdminController::class, 'userStore'])->name('admin.users.store');
     Route::get('/users/{id}', [AdminController::class, 'userShow'])->name('admin.users.show');
     Route::get('/users/{id}/edit', [AdminController::class, 'userEdit'])->name('admin.users.edit');
     Route::put('/users/{id}', [AdminController::class, 'userUpdate'])->name('admin.users.update');
@@ -105,11 +158,66 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 // Routes pour les partenaires
 Route::prefix('partner')->middleware(['auth', 'role:partenaire'])->group(function () {
     Route::get('/dashboard', [PartnerController::class, 'dashboard'])->name('partner.dashboard');
-    // Autres routes pour les partenaires...
+    
+    // Gestion des voyages (offres)
+    Route::get('/voyages', [PartnerController::class, 'voyagesList'])->name('partner.voyages.list');
+    Route::get('/voyages/create', [PartnerController::class, 'voyageCreate'])->name('partner.voyages.create');
+    Route::post('/voyages', [PartnerController::class, 'voyageStore'])->name('partner.voyages.store');
+    Route::get('/voyages/{id}', [PartnerController::class, 'voyageShow'])->name('partner.voyages.show');
+    Route::get('/voyages/{id}/edit', [PartnerController::class, 'voyageEdit'])->name('partner.voyages.edit');
+    Route::put('/voyages/{id}', [PartnerController::class, 'voyageUpdate'])->name('partner.voyages.update');
+    Route::delete('/voyages/{id}', [PartnerController::class, 'voyageDestroy'])->name('partner.voyages.destroy');
+    
+    // Gestion des destinations (utilisant DestinationController)
+    Route::get('/destinations', [DestinationController::class, 'index'])->name('partner.destinations.list');
+    Route::get('/destinations/create', [DestinationController::class, 'create'])->name('partner.destinations.create');
+    Route::post('/destinations', [DestinationController::class, 'store'])->name('partner.destinations.store');
+    Route::get('/destinations/{id}/edit', [DestinationController::class, 'edit'])->name('partner.destinations.edit');
+    Route::put('/destinations/{id}', [DestinationController::class, 'update'])->name('partner.destinations.update');
+    Route::delete('/destinations/{id}', [DestinationController::class, 'destroy'])->name('partner.destinations.destroy');
+    
+    // Gestion des clients
+    Route::get('/clients', [PartnerController::class, 'clientsList'])->name('partner.clients.list');
+    Route::get('/clients/{id}', [PartnerController::class, 'clientShow'])->name('partner.clients.show');
+    
+    // Gestion des paiements
+    Route::get('/payments', [PartnerController::class, 'paymentsList'])->name('partner.payments.list');
+    Route::get('/payments/{id}', [PartnerController::class, 'paymentShow'])->name('partner.payments.show');
+    
+    // Gestion des avis
+    Route::get('/reviews', [PartnerController::class, 'reviewsList'])->name('partner.reviews.list');
+    Route::get('/reviews/{id}', [PartnerController::class, 'reviewShow'])->name('partner.reviews.show');
+    Route::post('/reviews/{id}/reply', [PartnerController::class, 'reviewReply'])->name('partner.reviews.reply');
+    
+    // Gestion de l'agence
+    Route::get('/agency', [PartnerController::class, 'agencyShow'])->name('partner.agency.show');
+    Route::get('/agency/edit', [PartnerController::class, 'agencyEdit'])->name('partner.agency.edit');
+    Route::put('/agency', [PartnerController::class, 'agencyUpdate'])->name('partner.agency.update');
 });
 
 // Routes pour les clients
 Route::prefix('client')->middleware(['auth', 'role:client'])->group(function () {
     Route::get('/dashboard', [ClientController::class, 'dashboard'])->name('client.dashboard');
-    // Autres routes pour les clients...
+    
+    // Gestion des réservations
+    Route::get('/reservations/add', [ClientController::class, 'addReservation'])->name('client.reservations.add');
+    Route::get('/reservations', [ClientController::class, 'listReservations'])->name('client.reservations.list');
+    Route::get('/reservations/{id}', [ClientController::class, 'showReservation'])->name('client.reservations.show');
+    Route::post('/reservations/{id}/cancel', [ClientController::class, 'cancelReservation'])->name('client.reservations.cancel');
+    Route::get('/reservations/{id}/confirmation', [ClientController::class, 'confirmationReservation'])->name('client.reservations.confirmation');
+    
+    // Gestion du profil
+    Route::get('/profile', [ClientController::class, 'profile'])->name('client.profile');
+    Route::get('/profile/edit', [ClientController::class, 'editProfile'])->name('client.profile.edit');
+    Route::put('/profile', [ClientController::class, 'updateProfile'])->name('client.profile.update');
 });
+ // Ajoutez cette route en dehors des groupes de middleware pour tester
+Route::get('/test-reservation', [ClientController::class, 'addReservation'])->name('test.reservation');
+
+
+
+
+// Redirection de la route /home vers la route appropriée
+Route::get('/home', function () {
+    return redirect()->route('dashboard');
+})->name('home');
