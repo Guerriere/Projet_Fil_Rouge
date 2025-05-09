@@ -1,0 +1,217 @@
+/* Styles généraux */
+:root {
+    --primary-color: #4e73df;
+    --secondary-color: #1cc88a;
+    --danger-color: #e74a3b;
+    --warning-color: #f6c23e;
+    --info-color: #36b9cc;
+    --dark-color: #5a5c69;
+    --light-color: #f8f9fc;
+    --sidebar-bg: #4e73df;
+    --sidebar-text: #fff;
+    --sidebar-hover: #3a5cbe;
+    --sidebar-active: #fff;
+    --header-bg: #fff;
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f8f9fc;
+    color: #5a5c69;
+}
+
+/* Styles pour la sidebar */
+.left-sidebar {
+    position: fixed;
+    width: 250px;
+    height: 100%;
+    top: 0;
+    z-index: 10;
+    padding-top: 64px;
+    background: var(--sidebar-bg);
+    background: linear-gradient(180deg, var(--sidebar-bg) 10%, #224abe 100%);
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    transition: 0.2s ease-in;
+}
+
+.scroll-sidebar {
+    height: calc(100% - 20px);
+    position: relative;
+    overflow-y: auto;
+}
+
+.sidebar-nav ul {
+    margin: 0px;
+    padding: 0px;
+}
+
+.sidebar-nav ul li {
+    list-style: none;
+    margin-bottom: 5px;
+}
+
+/* Styles pour les liens du menu - SANS SOULIGNEMENT */
+.sidebar-nav ul li a {
+    color: rgba(255, 255, 255, 0.8);
+    padding: 12px 15px;
+    display: block;
+    font-size: 14px;
+    position: relative;
+    white-space: nowrap;
+    border-radius: 5px;
+    margin: 0 10px;
+    transition: all 0.3s ease;
+    text-decoration: none; /* Supprime le soulignement */
+}
+
+.sidebar-nav ul li a:hover {
+    color: var(--sidebar-active);
+    background-color: rgba(255, 255, 255, 0.1);
+    text-decoration: none; /* Supprime le soulignement au survol */
+}
+
+.sidebar-nav ul li a.active {
+    color: var(--sidebar-active);
+    background-color: rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+    text-decoration: none; /* Supprime le soulignement quand actif */
+}
+
+/* Styles pour les sous-menus */
+.sidebar-nav ul li ul {
+    padding-left: 15px;
+    display: none;
+    margin-top: 5px;
+}
+
+.sidebar-nav ul li ul.collapse.in {
+    display: block;
+}
+
+.sidebar-nav ul li a.has-arrow:after {
+    position: absolute;
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-width: 1px 0 0 1px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.8);
+    right: 1em;
+    transform: rotate(135deg) translate(0, -50%);
+    transform-origin: top;
+    top: 47%;
+    transition: all .3s ease-out;
+}
+
+.sidebar-nav ul li a.has-arrow[aria-expanded="true"]:after,
+.sidebar-nav ul li a.has-arrow.active:after {
+    transform: rotate(-135deg) translate(0, -50%);
+}
+
+/* Styles pour les icônes */
+.sidebar-nav ul li a i {
+    font-size: 18px;
+    margin-right: 10px;
+    vertical-align: middle;
+    width: 20px;
+    display: inline-block;
+    text-align: center;
+}
+
+/* Styles pour le menu réduit */
+.mini-sidebar .left-sidebar {
+    width: 70px;
+}
+
+.mini-sidebar .sidebar-nav #sidebarnav > li > a {
+    padding: 15px 10px;
+    text-align: center;
+}
+
+.mini-sidebar .sidebar-nav #sidebarnav > li > a i {
+    margin: 0;
+    font-size: 18px;
+}
+
+.mini-sidebar .sidebar-nav #sidebarnav > li > a span {
+    display: none;
+}
+
+.mini-sidebar .sidebar-nav #sidebarnav > li:hover > a {
+    width: 240px;
+    position: relative;
+    z-index: 1;
+}
+
+.mini-sidebar .sidebar-nav #sidebarnav > li:hover > a span {
+    display: inline-block;
+}
+
+.mini-sidebar .sidebar-nav #sidebarnav > li:hover > ul {
+    display: block;
+    left: 70px;
+    position: absolute;
+    width: 240px;
+    background: var(--sidebar-bg);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+/* Styles pour les badges */
+.sidebar-nav .badge {
+    margin-top: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 6px;
+}
+
+/* Styles pour les éléments sélectionnés */
+.sidebar-nav ul li.selected > a {
+    color: var(--sidebar-active);
+    background-color: rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+}
+
+.sidebar-nav ul li.selected > ul {
+    display: block;
+}
+
+/* Animation pour les menus déroulants */
+.collapse {
+    transition: height 0.3s ease;
+}
+
+.collapse.in {
+    height: auto;
+}
+
+/* Styles pour les séparateurs */
+.nav-small-cap {
+    font-size: 12px;
+    padding: 14px 14px 14px 20px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Styles pour le mode mobile */
+@media (max-width: 767px) {
+    .left-sidebar {
+        position: fixed;
+        width: 240px;
+        height: 100%;
+        top: 0;
+        z-index: 100;
+        padding-top: 60px;
+        background: var(--sidebar-bg);
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        transform: translateX(-240px);
+        transition: 0.2s ease-in;
+    }
+    
+    .show-sidebar .left-sidebar {
+        transform: translateX(0);
+    }
+}

@@ -22,7 +22,7 @@ class ReservationController extends Controller
                                   ->orderBy('created_at', 'desc')
                                   ->paginate(10);
         
-        return view('page.mes-reservations', compact('reservations'));
+        return view('Dashboard.client.mes-reservations', compact('reservations'));
     }
     
     /**

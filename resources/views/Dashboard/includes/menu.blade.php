@@ -1,3 +1,8 @@
+@extends('layouts.admin')
+
+@section('title', 'Menu')
+
+@section('content')
 <aside class="left-sidebar">
     <div class="scroll-sidebar">
         <nav class="sidebar-nav">
@@ -69,13 +74,13 @@
                             </a>
                             <ul aria-expanded="false" class="collapse first-level">
                                 <li class="sidebar-item">
-                                    <a href="{{ route('partner.offers.add') }}" class="sidebar-link">
+                                    <a href="{{ route('partner.voyages.create') }}" class="sidebar-link">
                                         <i class="mdi mdi-plus-circle"></i>
                                         <span class="hide-menu">Ajouter</span>
                                     </a>
                                 </li>
                                 <li class="sidebar-item">
-                                    <a href="{{ route('partner.offers.list') }}" class="sidebar-link">
+                                    <a href="{{ route('partner.voyages.list') }}" class="sidebar-link">
                                         <i class="mdi mdi-format-list-bulleted"></i>
                                         <span class="hide-menu">Lister</span>
                                     </a>
@@ -89,7 +94,7 @@
                             </a>
                             <ul aria-expanded="false" class="collapse first-level">
                                 <li class="sidebar-item">
-                                    <a href="{{ route('partner.destinations.add') }}" class="sidebar-link">
+                                    <a href="{{ route('partner.destinations.create') }}" class="sidebar-link">
                                         <i class="mdi mdi-plus-circle"></i>
                                         <span class="hide-menu">Ajouter</span>
                                     </a>
@@ -108,12 +113,6 @@
                                 <span class="hide-menu">Clients</span>
                             </a>
                             <ul aria-expanded="false" class="collapse first-level">
-                                <li class="sidebar-item">
-                                    <a href="{{ route('partner.clients.add') }}" class="sidebar-link">
-                                        <i class="mdi mdi-plus-circle"></i>
-                                        <span class="hide-menu">Ajouter</span>
-                                    </a>
-                                </li>
                                 <li class="sidebar-item">
                                     <a href="{{ route('partner.clients.list') }}" class="sidebar-link">
                                         <i class="mdi mdi-format-list-bulleted"></i>
@@ -155,13 +154,19 @@
                     <!-- Menu pour l'administrateur -->
                     @if (Auth::user()->role === 'admin')
                         <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark" href="{{ route('admin.dashboard') }}">
+                                <i class="mdi mdi-view-dashboard"></i>
+                                <span class="hide-menu">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
                             <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)">
                                 <i class="mdi mdi-account-tie"></i>
                                 <span class="hide-menu">Partenaires</span>
                             </a>
                             <ul aria-expanded="false" class="collapse first-level">
                                 <li class="sidebar-item">
-                                    <a href="{{ route('admin.partners.add') }}" class="sidebar-link">
+                                    <a href="{{ route('admin.partners.create') }}" class="sidebar-link">
                                         <i class="mdi mdi-plus-circle"></i>
                                         <span class="hide-menu">Ajouter</span>
                                     </a>
@@ -174,6 +179,106 @@
                                 </li>
                             </ul>
                         </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)">
+                                <i class="mdi mdi-account-multiple"></i>
+                                <span class="hide-menu">Utilisateurs</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a href="{{ route('admin.users.create') }}" class="sidebar-link">
+                                        <i class="mdi mdi-plus-circle"></i>
+                                        <span class="hide-menu">Ajouter</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a href="{{ route('admin.users.list') }}" class="sidebar-link">
+                                        <i class="mdi mdi-format-list-bulleted"></i>
+                                        <span class="hide-menu">Lister</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)">
+                                <i class="mdi mdi-ticket-alt"></i>
+                                <span class="hide-menu">Réservations</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a href="{{ route('admin.reservations.list') }}" class="sidebar-link">
+                                        <i class="mdi mdi-format-list-bulleted"></i>
+                                        <span class="hide-menu">Lister</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)">
+                                <i class="mdi mdi-cash"></i>
+                                <span class="hide-menu">Paiements</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a href="{{ route('admin.payments.list') }}" class="sidebar-link">
+                                        <i class="mdi mdi-format-list-bulleted"></i>
+                                        <span class="hide-menu">Lister</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)">
+                                <i class="mdi mdi-route"></i>
+                                <span class="hide-menu">Voyages</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a href="{{ route('admin.voyages.create') }}" class="sidebar-link">
+                                        <i class="mdi mdi-plus-circle"></i>
+                                        <span class="hide-menu">Ajouter</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a href="{{ route('admin.voyages.list') }}" class="sidebar-link">
+                                        <i class="mdi mdi-format-list-bulleted"></i>
+                                        <span class="hide-menu">Lister</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link has-arrow waves-effect waves-dark" href="javascript:void(0)">
+                                <i class="mdi mdi-map-marker"></i>
+                                <span class="hide-menu">Destinations</span>
+                            </a>
+                            <ul aria-expanded="false" class="collapse first-level">
+                                <li class="sidebar-item">
+                                    <a href="{{ route('admin.destinations.create') }}" class="sidebar-link">
+                                        <i class="mdi mdi-plus-circle"></i>
+                                        <span class="hide-menu">Ajouter</span>
+                                    </a>
+                                </li>
+                                <li class="sidebar-item">
+                                    <a href="{{ route('admin.destinations.list') }}" class="sidebar-link">
+                                        <i class="mdi mdi-format-list-bulleted"></i>
+                                        <span class="hide-menu">Lister</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark" href="{{ route('admin.reports') }}">
+                                <i class="mdi mdi-chart-bar"></i>
+                                <span class="hide-menu">Rapports</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link waves-effect waves-dark" href="{{ route('admin.settings') }}">
+                                <i class="mdi mdi-cog"></i>
+                                <span class="hide-menu">Paramètres</span>
+                            </a>
+                        </li>
                     @endif
                 @endif
             </ul>
@@ -184,3 +289,4 @@
 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
     @csrf
 </form>
+@endsection

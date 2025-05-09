@@ -1,0 +1,246 @@
+/* Styles pour le header */
+.topbar {
+    background-color: #fff;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    position: fixed;
+    width: 100%;
+    z-index: 20;
+    height: 64px;
+}
+
+.topbar .navbar {
+    padding: 0;
+}
+
+.navbar-header {
+    background-color: var(--sidebar-bg);
+    width: 250px;
+    text-align: center;
+    line-height: 64px;
+    transition: 0.2s ease-in;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 15px;
+    margin: 0;
+    height: 64px;
+    text-decoration: none; /* Supprime le soulignement */
+}
+
+.logo-icon {
+    margin-right: 5px;
+}
+
+.logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+}
+
+/* Styles pour les boutons du header */
+.nav-toggler {
+    padding: 0.75rem 1rem;
+    font-size: 1.25rem;
+    line-height: 1;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 0.25rem;
+    color: rgba(0, 0, 0, 0.5);
+    text-decoration: none; /* Supprime le soulignement */
+}
+
+.nav-toggler:hover {
+    color: rgba(0, 0, 0, 0.7);
+    text-decoration: none; /* Supprime le soulignement au survol */
+}
+
+/* Styles pour la barre de recherche */
+.search-box {
+    position: relative;
+    margin-left: 15px;
+}
+
+.search-box .app-search {
+    position: absolute;
+    margin-top: 0;
+    z-index: 110;
+    width: 100%;
+    top: 60px;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    display: none;
+    left: 0;
+}
+
+.search-box .app-search input {
+    width: 100%;
+    padding: 25px 40px 25px 20px;
+    border: none;
+    background: #fff;
+    border-radius: 4px;
+}
+
+.search-box .app-search .srh-btn {
+    position: absolute;
+    top: 23px;
+    cursor: pointer;
+    right: 20px;
+    color: #999;
+    text-decoration: none; /* Supprime le soulignement */
+}
+
+.search-box .app-search.show-search {
+    display: block;
+}
+
+/* Styles pour les notifications et messages */
+.dropdown-menu {
+    padding: 0;
+    border: 0;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    border-radius: 0.35rem;
+}
+
+.dropdown-menu .dropdown-item {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    text-decoration: none; /* Supprime le soulignement */
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: #f8f9fc;
+    text-decoration: none; /* Supprime le soulignement au survol */
+}
+
+.dropdown-menu .dropdown-divider {
+    margin: 0;
+}
+
+.dropdown-menu .drop-title {
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #3a3b45;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.message-center {
+    height: 280px;
+    overflow-y: auto;
+}
+
+.message-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e3e6f0;
+    text-decoration: none; /* Supprime le soulignement */
+    color: #3a3b45;
+}
+
+.message-item:hover {
+    background-color: #f8f9fc;
+    text-decoration: none; /* Supprime le soulignement au survol */
+}
+
+.btn-circle {
+    border-radius: 100%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.mail-contnet {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.message-title {
+    font-size: 14px;
+    margin-bottom: 2px;
+    font-weight: 600;
+}
+
+.mail-desc, .time {
+    font-size: 12px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #6c757d;
+}
+
+.time {
+    font-style: italic;
+}
+
+/* Styles pour le profil utilisateur */
+.user-dd {
+    min-width: 200px;
+    padding: 0;
+}
+
+.user-dd .dropdown-item {
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    text-decoration: none; /* Supprime le soulignement */
+}
+
+.user-dd .dropdown-item i {
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+.pro-pic {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    text-decoration: none; /* Supprime le soulignement */
+}
+
+.pro-pic img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+/* Styles pour les badges */
+.badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 6px;
+}
+
+/* Styles pour le mode mini-sidebar */
+.mini-sidebar .navbar-header {
+    width: 70px;
+}
+
+.mini-sidebar .logo-text {
+    display: none;
+}
+
+/* Styles pour le mode mobile */
+@media (max-width: 767px) {
+    .navbar-header {
+        width: 70px;
+    }
+    
+    .logo-text {
+        display: none;
+    }
+    
+    .topbar .navbar-collapse {
+        padding: 0 10px;
+    }
+}

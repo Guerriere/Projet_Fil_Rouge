@@ -9,9 +9,6 @@
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     
@@ -22,22 +19,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css">
     
     <!-- Custom CSS -->
-    <link href="{{ asset('assets/css/admin-style.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/css/header-style.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/css/content-style.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/css/preloader.css') }}" rel="stylesheet">
-    
-    <style>
-        /* Suppression globale du soulignement des liens */
-        a {
-            text-decoration: none !important;
-        }
-        
-        /* Suppression du soulignement au survol */
-        a:hover {
-            text-decoration: none !important;
-        }
-    </style>
+    <link href="{{ asset('assets/css/style.min.css') }}" rel="stylesheet">
     
     <!-- Additional CSS -->
     @stack('styles')
@@ -94,71 +76,20 @@
         </div>
     </div>
     
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Perfect Scrollbar -->
-    <script src="https://cdn.jsdelivr.net/npm/perfect-scrollbar@1.5.5/dist/perfect-scrollbar.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Waves Effect -->
+    <script src="{{ asset('assets/js/waves.js') }}"></script>
+    
+    <!-- Menu sidebar -->
+    <script src="{{ asset('assets/js/sidebarmenu.js') }}"></script>
     
     <!-- Custom JavaScript -->
-    <script>
-    $(function() {
-        "use strict";
-        
-        // Preloader
-        $(window).on('load', function() {
-            $('.preloader').fadeOut();
-        });
-        
-        // Sidebar toggle
-        $('.nav-toggler').on('click', function() {
-            $("#main-wrapper").toggleClass("show-sidebar");
-            $(".nav-toggler i").toggleClass("ti-menu");
-        });
-        
-        // This is for the mini-sidebar
-        $(".sidebartoggler").on('click', function() {
-            $("#main-wrapper").toggleClass("mini-sidebar");
-        });
-        
-        // Perfect Scrollbar
-        if ($(".scroll-sidebar").length > 0) {
-            const ps = new PerfectScrollbar('.scroll-sidebar');
-        }
-        
-        // Search Toggle
-        $(".search-box a, .search-box .app-search .srh-btn").on('click', function() {
-            $(".app-search").toggle(200);
-        });
-        
-        // Fonction pour activer les menus déroulants
-        $('.sidebar-link.has-arrow').on('click', function(e) {
-            e.preventDefault();
-            
-            // Toggle the submenu
-            $(this).next('ul.collapse').toggleClass('in');
-            
-            // Toggle the arrow
-            $(this).toggleClass('active');
-        });
-        
-        // Activer automatiquement le menu correspondant à la page actuelle
-        var url = window.location.href;
-        $('.sidebar-nav ul li a').each(function() {
-            if (this.href === url) {
-                $(this).addClass('active');
-                $(this).parents('ul.collapse').addClass('in');
-                $(this).parents('li').find('a.has-arrow').addClass('active');
-            }
-        });
-    });
-    </script>
+    <script src="{{ asset('assets/js/custom.js') }}"></script>
     
     <!-- Additional Scripts -->
     @stack('scripts')

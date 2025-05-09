@@ -1,126 +1,115 @@
 <?php
 
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\Auth\PartnerRegistrationController;
-use App\Http\Controllers\PageController;
-use App\Http\Controllers\PartnerController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ReservationController;
-use App\Http\Controllers\DestinationController;
-
-use App\Http\Controllers\HomeController;
-
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\ClientController;
-use App\Http\Controllers\VoyageController;
 
-// Routes pour les réservations sans authentification
-Route::get('/reservation/create', [ReservationController::class, 'create'])->name('reservation.create');
-Route::post('/reservation/store-guest', [ReservationController::class, 'storeGuest'])->name('reservation.store.guest');
-Route::get('/reservation/confirmation-guest/{id}', [ReservationController::class, 'confirmationGuest'])->name('reservation.confirmation.guest');
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
 
-// Redirection après connexion
-Route::get('/dashboard', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
-Route::get('/home', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('home');
+// Routes publiques
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Routes d'authentification
+Auth::routes();
 
 // Routes pour l'administrateur
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-    Route::get('/partners/add', [AdminController::class, 'addPartner'])->name('partners.add');
-    Route::get('/partners/list', [AdminController::class, 'listPartners'])->name('partners.list');
+Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    
+    // Gestion des utilisateurs
+    Route::get('/users', [AdminController::class, 'usersList'])->name('admin.users.list');
+    Route::get('/users/create', [AdminController::class, 'userCreate'])->name('admin.users.create');
+    Route::post('/users', [AdminController::class, 'userStore'])->name('admin.users.store');
+    Route::get('/users/{id}', [AdminController::class, 'userShow'])->name('admin.users.show');
+    Route::get('/users/{id}/edit', [AdminController::class, 'userEdit'])->name('admin.users.edit');
+    Route::put('/users/{id}', [AdminController::class, 'userUpdate'])->name('admin.users.update');
+    Route::delete('/users/{id}', [AdminController::class, 'userDestroy'])->name('admin.users.destroy');
+    Route::post('/users/{id}/verify-email', [AdminController::class, 'userVerifyEmail'])->name('admin.users.verify-email');
+    Route::post('/users/{id}/reset-password', [AdminController::class, 'userResetPassword'])->name('admin.users.reset-password');
+    Route::post('/users/{id}/activate', [AdminController::class, 'userActivate'])->name('admin.users.activate');
+    Route::post('/users/{id}/deactivate', [AdminController::class, 'userDeactivate'])->name('admin.users.deactivate');
+    Route::post('/users/{id}/send-email', [AdminController::class, 'userSendEmail'])->name('admin.users.send-email');
+    Route::get('/users/export/{format}', [AdminController::class, 'usersExport'])->name('admin.users.export');
+    
+    // Gestion des partenaires
+    Route::get('/partners', [AdminController::class, 'partnersList'])->name('admin.partners.list');
+    Route::get('/partners/create', [AdminController::class, 'partnerCreate'])->name('admin.partners.create');
+    Route::post('/partners', [AdminController::class, 'partnerStore'])->name('admin.partners.store');
+    Route::get('/partners/{id}', [AdminController::class, 'partnerShow'])->name('admin.partners.show');
+    Route::get('/partners/{id}/edit', [AdminController::class, 'partnerEdit'])->name('admin.partners.edit');
+    Route::put('/partners/{id}', [AdminController::class, 'partnerUpdate'])->name('admin.partners.update');
+    Route::delete('/partners/{id}', [AdminController::class, 'partnerDestroy'])->name('admin.partners.destroy');
+    Route::get('/partners/export/{format}', [AdminController::class, 'partnersExport'])->name('admin.partners.export');
+    
+    // Gestion des voyages
+    Route::get('/voyages', [AdminController::class, 'voyagesList'])->name('admin.voyages.list');
+    Route::get('/voyages/create', [AdminController::class, 'voyageCreate'])->name('admin.voyages.create');
+    Route::post('/voyages', [AdminController::class, 'voyageStore'])->name('admin.voyages.store');
+    Route::get('/voyages/{id}', [AdminController::class, 'voyageShow'])->name('admin.voyages.show');
+    Route::get('/voyages/{id}/edit', [AdminController::class, 'voyageEdit'])->name('admin.voyages.edit');
+    Route::put('/voyages/{id}', [AdminController::class, 'voyageUpdate'])->name('admin.voyages.update');
+    Route::delete('/voyages/{id}', [AdminController::class, 'voyageDestroy'])->name('admin.voyages.destroy');
+    Route::get('/voyages/export/{format}', [AdminController::class, 'voyagesExport'])->name('admin.voyages.export');
+    
+    // Gestion des réservations
+    Route::get('/reservations', [AdminController::class, 'reservationsList'])->name('admin.reservations.list');
+    Route::get('/reservations/{id}', [AdminController::class, 'reservationShow'])->name('admin.reservations.show');
+    Route::put('/reservations/{id}/confirm', [AdminController::class, 'reservationConfirm'])->name('admin.reservations.confirm');
+    Route::put('/reservations/{id}/cancel', [AdminController::class, 'reservationCancel'])->name('admin.reservations.cancel');
+    Route::get('/reservations/export/{format}', [AdminController::class, 'reservationsExport'])->name('admin.reservations.export');
+    
+    // Gestion des paiements
+    Route::get('/payments', [AdminController::class, 'paymentsList'])->name('admin.payments.list');
+    Route::get('/payments/{id}', [AdminController::class, 'paymentShow'])->name('admin.payments.show');
+    Route::post('/payments/{id}/confirm', [AdminController::class, 'paymentConfirm'])->name('admin.payments.confirm');
+    Route::post('/payments/{id}/refund', [AdminController::class, 'paymentRefund'])->name('admin.payments.refund');
+    Route::post('/payments/{id}/add-note', [AdminController::class, 'paymentAddNote'])->name('admin.payments.add-note');
+    Route::get('/payments/export/{format}', [AdminController::class, 'paymentsExport'])->name('admin.payments.export');
+    Route::get('/payments/{id}/receipt', [AdminController::class, 'paymentExportReceipt'])->name('admin.payments.export.receipt');
+    
+    // Gestion des destinations
+    Route::get('/destinations', [AdminController::class, 'destinationsList'])->name('admin.destinations.list');
+    Route::get('/destinations/create', [AdminController::class, 'destinationCreate'])->name('admin.destinations.create');
+    Route::post('/destinations', [AdminController::class, 'destinationStore'])->name('admin.destinations.store');
+    Route::get('/destinations/{id}/edit', [AdminController::class, 'destinationEdit'])->name('admin.destinations.edit');
+    Route::put('/destinations/{id}', [AdminController::class, 'destinationUpdate'])->name('admin.destinations.update');
+    Route::delete('/destinations/{id}', [AdminController::class, 'destinationDestroy'])->name('admin.destinations.destroy');
+    Route::get('/destinations/export/{format}', [AdminController::class, 'destinationsExport'])->name('admin.destinations.export');
+    
+    // Rapports et statistiques
+    Route::get('/reports', [AdminController::class, 'reports'])->name('admin.reports');
+    Route::get('/reports/export/{type}/{format}', [AdminController::class, 'reportsExport'])->name('admin.reports.export');
+    
+    // Paramètres du site
+    Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
+    Route::put('/settings/{section}', [AdminController::class, 'settingsUpdate'])->name('admin.settings.update');
+    Route::post('/settings/test-email', [AdminController::class, 'settingsTestEmail'])->name('admin.settings.test-email');
+    
+    // Gestion des sauvegardes
+    Route::post('/backups/run', [AdminController::class, 'backupsRun'])->name('admin.backups.run');
+    Route::get('/backups/{filename}/download', [AdminController::class, 'backupsDownload'])->name('admin.backups.download');
+    Route::delete('/backups/{filename}', [AdminController::class, 'backupsDestroy'])->name('admin.backups.destroy');
+});
+
+// Routes pour les partenaires
+Route::prefix('partner')->middleware(['auth', 'role:partenaire'])->group(function () {
+    Route::get('/dashboard', [PartnerController::class, 'dashboard'])->name('partner.dashboard');
+    // Autres routes pour les partenaires...
 });
 
 // Routes pour les clients
-Route::middleware(['auth'])->group(function () {
-    // Dashboard
-    Route::get('/client/dashboard', [ClientController::class, 'dashboard'])->name('client.dashboard');
-    
-    // Profil
-    Route::get('/client/profile', [ClientController::class, 'profile'])->name('client.profile');
-    Route::get('/client/profile/edit', [ClientController::class, 'editProfile'])->name('client.profile.edit');
-    Route::put('/client/profile/update', [ClientController::class, 'updateProfile'])->name('client.profile.update');
-    
-    // Réservations
-    Route::get('/client/reservations', [ClientController::class, 'listReservations'])->name('client.reservations.list');
-    // Route pour afficher le formulaire de réservation
-    Route::get('/client/reservations/add', [App\Http\Controllers\ClientController::class, 'addReservation'])
-        ->name('client.reservations.add');
-
-    // Route pour traiter la réservation
-    Route::post('/reservation/store', [App\Http\Controllers\ReservationController::class, 'store'])
-        ->name('reservation.store');
-    Route::get('/client/reservations/{id}', [ClientController::class, 'showReservation'])->name('client.reservations.show');
-    Route::put('/client/reservations/{id}/cancel', [ClientController::class, 'cancelReservation'])->name('client.reservations.cancel');
-    Route::get('/client/reservations/{id}/confirmation', [ClientController::class, 'confirmationReservation'])->name('client.reservations.confirmation');
+Route::prefix('client')->middleware(['auth', 'role:client'])->group(function () {
+    Route::get('/dashboard', [ClientController::class, 'dashboard'])->name('client.dashboard');
+    // Autres routes pour les clients...
 });
-
-// Routes pour le partenaire
-Route::middleware(['auth'])->prefix('partner')->name('partner.')->group(function () {
-    Route::get('/dashboard', [PartnerController::class, 'dashboard'])->name('dashboard');
-    Route::get('/offers/add', [PartnerController::class, 'addOffer'])->name('offers.add');
-    Route::get('/offers/list', [PartnerController::class, 'listOffers'])->name('offers.list');
-    Route::get('/clients/add', [PartnerController::class, 'addClient'])->name('clients.add');
-    Route::get('/clients/list', [PartnerController::class, 'listClients'])->name('clients.list');
-    Route::get('/reservations/add', [PartnerController::class, 'addReservation'])->name('reservations.add');
-    Route::get('/reservations/list', [PartnerController::class, 'listReservations'])->name('reservations.list');
-    Route::get('/payments/list', [PartnerController::class, 'listPayments'])->name('payments.list');
-    Route::get('/reviews/list', [PartnerController::class, 'listReviews'])->name('reviews.list');
-
-    
-    //Route pour les destinations
-    Route::get('/destinations/add', [DestinationController::class, 'create'])->name('destinations.add');
-    Route::post('/destinations/store', [DestinationController::class, 'store'])->name('destinations.store');
-    Route::get('/destinations/list', [DestinationController::class, 'index'])->name('destinations.list');
-    Route::get('/destinations/edit/{id}', [DestinationController::class, 'edit'])->name('destinations.edit');
-    Route::put('/destinations/update/{id}', [DestinationController::class, 'update'])->name('destinations.update');
-    Route::delete('/destinations/delete/{id}', [DestinationController::class, 'destroy'])->name('destinations.delete');
-
-    // Routes pour les Voyages
-    Route::get('/offers/add', [VoyageController::class, 'create'])->name('offers.add');
-    Route::post('/offers/store', [VoyageController::class, 'store'])->name('offers.store');
-    Route::get('/offers/list', [VoyageController::class, 'index'])->name('offers.list');
-    Route::get('/offers/edit/{id}', [VoyageController::class, 'edit'])->name('offers.edit');
-    Route::put('/offers/update/{id}', [VoyageController::class, 'update'])->name('offers.update');
-    Route::delete('/offers/delete/{id}', [VoyageController::class, 'destroy'])->name('offers.delete');
-});
-
-// Routes pour le profil utilisateur
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-   //Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    // Routes pour modifier le profil du partenaire
-    Route::get('/partner/edit', [PartnerController::class, 'edit'])->name('partner.edit');
-    Route::put('/partner/update', [PartnerController::class, 'update'])->name('partner.update');
-    Route::get('/partner/profile', [PartnerController::class, 'show'])->name('partner.show');
-    Route::delete('/partner/delete', [PartnerController::class, 'destroy'])->name('partner.destroy');
-});
-
-// Routes pour les réservations
-//Route::middleware(['auth'])->group(function () {
-   // Route::get('/mes-reservations', [App\Http\Controllers\ReservationController::class, 'index'])->name('reservation.index');
-   // Route::get('/reservation/{reservation}', [App\Http\Controllers\ReservationController::class, 'show'])->name('reservation.show');
-   // Route::put('/reservation/{reservation}/cancel', [App\Http\Controllers\ReservationController::class, 'cancel'])->name('reservation.cancel');
-   // Route::get('/reservation/{reservation}/confirmation', [App\Http\Controllers\ReservationController::class, 'confirmation'])->name('reservation.confirmation');
-//});
-
-// Pages accessibles sans authentification
-Route::get('/', [PageController::class, 'accueil'])->name('accueil');
-Route::get('about', [PageController::class, 'about'])->name('about');
-Route::get('contact', [PageController::class, 'contact'])->name('contact');
-Route::get('services', [PageController::class, 'services'])->name('services');
-Route::get('booking', [PageController::class, 'booking'])->name('booking');
-Route::get('faq', [PageController::class, 'faq'])->name('faq');
-Route::get('error', [PageController::class, 'error'])->name('error');
-// Routes pour les agences
-Route::get('/agence', [App\Http\Controllers\AgenceController::class, 'index'])->name('agence.index');
-Route::get('/agence/{id}', [App\Http\Controllers\AgenceController::class, 'show'])->name('agence.show');
-// Route pour afficher un voyage spécifique après connexion
-//Route::get('/agence/voyage/{voyage}', [App\Http\Controllers\AgenceController::class, 'showVoyage'])->name('agence.show.voyage');
-
-require __DIR__.'/auth.php';

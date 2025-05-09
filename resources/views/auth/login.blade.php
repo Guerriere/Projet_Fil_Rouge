@@ -43,30 +43,6 @@
             border-color: #0056b3;
         }
     </style>
-    
-    @if(Auth::check())
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Récupérer l'ID du voyage depuis l'URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const voyageId = urlParams.get('intended_voyage_id');
-            
-            if (voyageId) {
-                // Rediriger vers la page de réservation
-                window.location.href = "{{ url('/client/reservations/add') }}?voyage_id=" + voyageId;
-            } else {
-                // Rediriger vers le tableau de bord selon le rôle
-                @if(Auth::user()->role === 'admin')
-                    window.location.href = "{{ route('admin.dashboard') }}";
-                @elseif(Auth::user()->role === 'partenaire')
-                    window.location.href = "{{ route('partner.dashboard') }}";
-                @else
-                    window.location.href = "{{ route('client.dashboard') }}";
-                @endif
-            }
-        });
-    </script>
-    @endif
 </head>
 <body class="flex items-center justify-center min-h-screen">
     <!-- Superposition sombre -->
